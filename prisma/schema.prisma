@@ -1,0 +1,404 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────
+// AUTH / IDENTITY
+// ─────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  image         String?
+  passwordHash  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Auth.js relations
+  accounts      Account[]
+  sessions      Session[]
+
+  // App relations
+  workspaceMembers WorkspaceMember[]
+  createdPosts     Post[]            @relation("PostAuthor")
+  notifications    Notification[]
+  activityLogs     ActivityLog[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ─────────────────────────────────────────────────
+// WORKSPACE / TEAM
+// ─────────────────────────────────────────────────
+
+enum WorkspacePlan {
+  FREE
+  STARTER
+  GROWTH
+  ENTERPRISE
+}
+
+enum MemberRole {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+model Workspace {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  logo        String?
+  plan        WorkspacePlan @default(FREE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Brand identity (populated from website analysis)
+  websiteUrl        String?
+  brandName         String?
+  brandDescription  String?
+  brandColors       String[]  @default([])
+  brandKeywords     String[]  @default([])
+  brandVoice        String?   // professional | casual | humorous | inspiring | educational | bold
+
+  members         WorkspaceMember[]
+  socialAccounts  SocialAccount[]
+  posts           Post[]
+  aiCredits       Int               @default(50)
+  invites         WorkspaceInvite[]
+  activityLogs    ActivityLog[]
+  mediaFiles      Media[]
+
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          String     @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        MemberRole @default(EDITOR)
+  joinedAt    DateTime   @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+model WorkspaceInvite {
+  id          String     @id @default(cuid())
+  workspaceId String
+  email       String
+  role        MemberRole @default(EDITOR)
+  token       String     @unique @default(cuid())
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime   @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("workspace_invites")
+}
+
+// ─────────────────────────────────────────────────
+// SOCIAL ACCOUNTS
+// ─────────────────────────────────────────────────
+
+enum SocialPlatform {
+  TWITTER
+  INSTAGRAM
+  FACEBOOK
+  LINKEDIN
+  TIKTOK
+  YOUTUBE
+  THREADS
+  PINTEREST
+}
+
+model SocialAccount {
+  id            String         @id @default(cuid())
+  workspaceId   String
+  platform      SocialPlatform
+  platformId    String
+  username      String
+  displayName   String
+  avatar        String?
+  accessToken   String         @db.Text
+  refreshToken  String?        @db.Text
+  tokenExpiresAt DateTime?
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  postTargets PostTarget[]
+
+  @@unique([workspaceId, platform, platformId])
+  @@map("social_accounts")
+}
+
+// ─────────────────────────────────────────────────
+// POSTS & SCHEDULING
+// ─────────────────────────────────────────────────
+
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+  ARCHIVED
+}
+
+enum PostType {
+  TEXT
+  IMAGE
+  VIDEO
+  CAROUSEL
+  STORY
+  REEL
+  THREAD
+  LINK
+}
+
+model Post {
+  id          String     @id @default(cuid())
+  workspaceId String
+  authorId    String
+  title       String?
+  content     String     @db.Text
+  mediaUrls   String[]
+  type        PostType   @default(TEXT)
+  status      PostStatus @default(DRAFT)
+  scheduledAt DateTime?
+  publishedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // AI generation metadata
+  aiGenerated  Boolean    @default(false)
+  aiPrompt     String?    @db.Text
+  aiModel      String?
+
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  author      User         @relation("PostAuthor", fields: [authorId], references: [id])
+  targets     PostTarget[]
+  hashtags    PostHashtag[]
+
+  @@map("posts")
+}
+
+model PostTarget {
+  id              String        @id @default(cuid())
+  postId          String
+  socialAccountId String
+  platformContent String?       @db.Text
+  platformPostId  String?
+  status          PostStatus    @default(DRAFT)
+  publishedAt     DateTime?
+  error           String?
+
+  post          Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, socialAccountId])
+  @@map("post_targets")
+}
+
+model PostHashtag {
+  id     String @id @default(cuid())
+  postId String
+  tag    String
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("post_hashtags")
+}
+
+model HashtagGroup {
+  id          String   @id @default(cuid())
+  workspaceId String
+  name        String
+  tags        String[]
+  createdAt   DateTime @default(now())
+
+  @@map("hashtag_groups")
+}
+
+// ─────────────────────────────────────────────────
+// AI GENERATION
+// ─────────────────────────────────────────────────
+
+enum AIGenerationType {
+  POST_CAPTION
+  HASHTAGS
+  IMAGE_PROMPT
+  THREAD
+  CAMPAIGN
+  REPURPOSE
+}
+
+model AIGeneration {
+  id          String           @id @default(cuid())
+  workspaceId String
+  userId      String
+  type        AIGenerationType
+  prompt      String           @db.Text
+  output      String           @db.Text
+  model       String
+  tokensUsed  Int              @default(0)
+  createdAt   DateTime         @default(now())
+
+  @@map("ai_generations")
+}
+
+// ─────────────────────────────────────────────────
+// MEDIA LIBRARY
+// ─────────────────────────────────────────────────
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  GIF
+  DOCUMENT
+}
+
+model Media {
+  id           String    @id @default(cuid())
+  workspaceId  String
+  uploadedBy   String
+  url          String
+  thumbnailUrl String?
+  type         MediaType
+  filename     String
+  size         Int
+  mimeType     String
+  width        Int?
+  height       Int?
+  duration     Int?
+  altText      String?
+  tags         String[]
+  createdAt    DateTime  @default(now())
+
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("media")
+}
+
+// ─────────────────────────────────────────────────
+// NOTIFICATIONS
+// ─────────────────────────────────────────────────
+
+enum NotificationType {
+  POST_PUBLISHED
+  POST_FAILED
+  POST_SCHEDULED
+  TEAM_INVITE
+  TEAM_JOINED
+  AI_CREDITS_LOW
+  ACCOUNT_DISCONNECTED
+  SYSTEM
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  userId      String
+  type        NotificationType
+  title       String
+  body        String
+  data        Json?
+  read        Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+// ─────────────────────────────────────────────────
+// ANALYTICS
+// ─────────────────────────────────────────────────
+
+model PostAnalytics {
+  id              String   @id @default(cuid())
+  postTargetId    String   @unique
+  impressions     Int      @default(0)
+  reach           Int      @default(0)
+  engagements     Int      @default(0)
+  likes           Int      @default(0)
+  comments        Int      @default(0)
+  shares          Int      @default(0)
+  clicks          Int      @default(0)
+  saves           Int      @default(0)
+  profileVisits   Int      @default(0)
+  lastFetchedAt   DateTime @default(now())
+
+  @@map("post_analytics")
+}
+
+// ─────────────────────────────────────────────────
+// ACTIVITY LOG
+// ─────────────────────────────────────────────────
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userId      String
+  action      String
+  entity      String
+  entityId    String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("activity_logs")
+}
