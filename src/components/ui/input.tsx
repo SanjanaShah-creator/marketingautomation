@@ -18,13 +18,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="flex flex-col gap-1.5">
         {label && (
-          <label htmlFor={inputId} className="text-xs font-medium text-[#8892aa]">
+          <label htmlFor={inputId} className="text-sm font-medium" style={{ color: "var(--ink-secondary)" }}>
             {label}
           </label>
         )}
         <div className="relative">
           {leftIcon && (
-            <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#4d5675]">
+            <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--ink-tertiary)" }}>
               {leftIcon}
             </div>
           )}
@@ -32,28 +32,28 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             type={type}
             className={cn(
-              "flex h-9 w-full rounded-[0.625rem] bg-[rgba(255,255,255,0.04)] px-3 py-2 text-sm text-[#f1f3f9]",
-              "border border-[rgba(255,255,255,0.08)] placeholder:text-[#4d5675]",
-              "transition-all duration-150",
-              "hover:border-[rgba(255,255,255,0.14)]",
-              "focus:border-[rgba(97,114,243,0.6)] focus:bg-[rgba(255,255,255,0.06)] focus:outline-none focus:ring-3 focus:ring-[rgba(97,114,243,0.12)]",
+              "flex h-10 w-full rounded-[0.625rem] px-3 py-2 text-sm",
+              "border transition-all duration-150",
+              "placeholder:text-[var(--ink-muted)]",
+              "focus:outline-none focus:ring-2 focus:ring-[rgba(23,122,65,0.35)] focus:border-[rgba(23,122,65,0.6)]",
               "disabled:cursor-not-allowed disabled:opacity-40",
-              error && "border-[rgba(239,68,68,0.5)] focus:border-[rgba(239,68,68,0.7)] focus:ring-[rgba(239,68,68,0.12)]",
+              error && "border-[rgba(155,28,28,0.5)] focus:border-[rgba(155,28,28,0.7)] focus:ring-[rgba(155,28,28,0.15)]",
               leftIcon && "pl-9",
               rightIcon && "pr-9",
               className
             )}
+            style={{ backgroundColor: "var(--card)", borderColor: error ? undefined : "var(--border-strong)", color: "var(--ink-primary)" }}
             ref={ref}
             {...props}
           />
           {rightIcon && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4d5675]">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "var(--ink-tertiary)" }}>
               {rightIcon}
             </div>
           )}
         </div>
-        {error && <p className="text-xs text-[#f87171]">{error}</p>}
-        {hint && !error && <p className="text-xs text-[#4d5675]">{hint}</p>}
+        {error && <p className="text-sm" style={{ color: "var(--danger)" }}>{error}</p>}
+        {hint && !error && <p className="text-sm" style={{ color: "var(--ink-tertiary)" }}>{hint}</p>}
       </div>
     );
   }

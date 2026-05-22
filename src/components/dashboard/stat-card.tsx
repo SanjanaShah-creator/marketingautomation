@@ -33,16 +33,10 @@ function MiniSparkline({ data }: { data: number[] }) {
 
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="overflow-visible">
-      <defs>
-        <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#6172f3" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="#6172f3" stopOpacity="0" />
-        </linearGradient>
-      </defs>
       <polyline
         points={points}
         fill="none"
-        stroke="#6172f3"
+        stroke="#177A41"
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -58,7 +52,6 @@ export function StatCard({
   icon: Icon,
   iconColor = "#818cf8",
   iconBg = "rgba(97,114,243,0.12)",
-  trend,
   suffix,
   className,
   sparkline,
@@ -69,14 +62,10 @@ export function StatCard({
 
   return (
     <div className={cn("card-base p-5 relative overflow-hidden group", className)}>
-      {/* Subtle gradient top border */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[rgba(97,114,243,0.3)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
       <div className="flex items-start justify-between mb-3">
-        <div
-          className="flex h-9 w-9 items-center justify-center rounded-xl"
-          style={{ backgroundColor: iconBg }}
-        >
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ backgroundColor: iconBg }}>
           <Icon className="h-4 w-4" style={{ color: iconColor }} />
         </div>
         {sparkline && (
@@ -87,24 +76,19 @@ export function StatCard({
       </div>
 
       <div className="space-y-0.5">
-        <p className="text-2xs font-medium uppercase tracking-widest text-[#4d5675]">{label}</p>
+        <p className="text-2xs font-medium uppercase tracking-widest" style={{ color: "var(--ink-tertiary)" }}>{label}</p>
         <div className="flex items-end gap-2">
-          <p className="text-2xl font-bold text-[#f1f3f9] tracking-tight leading-none">
+          <p className="text-2xl font-bold tracking-tight leading-none" style={{ color: "var(--ink-primary)" }}>
             {displayValue}
-            {suffix && <span className="text-base font-medium text-[#8892aa] ml-0.5">{suffix}</span>}
+            {suffix && <span className="text-base font-medium ml-0.5" style={{ color: "var(--ink-secondary)" }}>{suffix}</span>}
           </p>
         </div>
         {delta !== undefined && (
           <div className="flex items-center gap-1 pt-0.5">
-            <span
-              className={cn(
-                "text-xs font-medium",
-                isPositive ? "text-[#34d399]" : isNegative ? "text-[#f87171]" : "text-[#8892aa]"
-              )}
-            >
+            <span className="text-xs font-medium" style={{ color: isPositive ? "var(--success)" : isNegative ? "var(--danger)" : "var(--ink-secondary)" }}>
               {isPositive ? "+" : ""}{delta}%
             </span>
-            <span className="text-2xs text-[#4d5675]">vs last week</span>
+            <span className="text-2xs" style={{ color: "var(--ink-tertiary)" }}>vs last week</span>
           </div>
         )}
       </div>

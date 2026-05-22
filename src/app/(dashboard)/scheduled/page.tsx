@@ -50,13 +50,13 @@ const now = new Date();
 const d = (h: number) => new Date(now.getTime() + h * 3600000);
 
 const mockPosts: ScheduledPost[] = [
-  { id: "1", content: "🚀 Exciting news! We're launching our new AI-powered content suite next week. Early access spots are limited — sign up now to be first in line. #ProductLaunch #SaaS", platforms: ["Twitter", "LinkedIn"], scheduledAt: d(2),   status: "scheduled" },
-  { id: "2", content: "Behind the scenes: our team sprint planning session. This is how we ship features fast while keeping quality high. ✨", platforms: ["Instagram"], scheduledAt: d(5),   status: "scheduled", imageUrl: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=320&h=200&fit=crop&auto=format&q=80" },
-  { id: "3", content: "📊 New blog post: '10 social media metrics that actually matter in 2025'. Link in bio!", platforms: ["Twitter", "LinkedIn", "Instagram"], scheduledAt: d(18),  status: "failed" },
-  { id: "4", content: "Customer spotlight: how @acmecorp grew their engagement by 3× in 60 days using our platform.", platforms: ["LinkedIn"], scheduledAt: d(26),  status: "scheduled" },
-  { id: "5", content: "Weekend tip: batch your content creation on Fridays so you can enjoy your weekends ☀️ #WorkSmart", platforms: ["Twitter", "Instagram"], scheduledAt: d(36),  status: "paused" },
-  { id: "6", content: "Q: What's the #1 mistake brands make on social media?\n\nA: Posting without a strategy.\n\nHere's the 3-step framework we use with our clients 🧵", platforms: ["Twitter"], scheduledAt: d(50),  status: "scheduled" },
-  { id: "7", content: "Monday motivation: 'The best time to plant a tree was 20 years ago. The second best time is now.' Start building your social presence today 🌱", platforms: ["Instagram", "LinkedIn"], scheduledAt: d(72),  status: "scheduled" },
+  { id: "1", content: "🚀 Exciting news! We're launching our new AI-powered content suite next week. Early access spots are limited — sign up now to be first in line. #ProductLaunch #SaaS", platforms: ["Twitter", "LinkedIn"], scheduledAt: d(2),  status: "scheduled" },
+  { id: "2", content: "Behind the scenes: our team sprint planning session. This is how we ship features fast while keeping quality high. ✨", platforms: ["Instagram"], scheduledAt: d(5),  status: "scheduled", imageUrl: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=320&h=200&fit=crop&auto=format&q=80" },
+  { id: "3", content: "📊 New blog post: '10 social media metrics that actually matter in 2025'. Link in bio!", platforms: ["Twitter", "LinkedIn", "Instagram"], scheduledAt: d(18), status: "failed" },
+  { id: "4", content: "Customer spotlight: how @acmecorp grew their engagement by 3× in 60 days using our platform.", platforms: ["LinkedIn"], scheduledAt: d(26), status: "scheduled" },
+  { id: "5", content: "Weekend tip: batch your content creation on Fridays so you can enjoy your weekends ☀️ #WorkSmart", platforms: ["Twitter", "Instagram"], scheduledAt: d(36), status: "paused" },
+  { id: "6", content: "Q: What's the #1 mistake brands make on social media?\n\nA: Posting without a strategy.\n\nHere's the 3-step framework we use with our clients 🧵", platforms: ["Twitter"], scheduledAt: d(50), status: "scheduled" },
+  { id: "7", content: "Monday motivation: 'The best time to plant a tree was 20 years ago. The second best time is now.' Start building your social presence today 🌱", platforms: ["Instagram", "LinkedIn"], scheduledAt: d(72), status: "scheduled" },
 ];
 
 // ── Week plan data (Mon–Sun current week) ──────────────────────────────────
@@ -66,47 +66,47 @@ function getWeekDays() {
   const monday = new Date(today);
   monday.setDate(today.getDate() - today.getDay() + 1);
   return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    return d;
+    const day = new Date(monday);
+    day.setDate(monday.getDate() + i);
+    return day;
   });
 }
 
 const WEEK_SUGGESTIONS: Record<number, WeekPost[]> = {
-  0: [ // Monday
+  0: [
     { id: "w0a", platform: "Twitter",   time: "09:00", tags: ["#MondayMotivation", "#Marketing"], content: "Monday mindset: The brands that win on social aren't the ones with the biggest budgets — they're the ones with the most consistent voice. What's yours? 💬 #MondayMotivation" },
     { id: "w0b", platform: "LinkedIn",  time: "17:00", tags: ["#ContentStrategy", "#B2B"],         content: "Starting this week with a question: How much time does your team spend on content creation vs. content strategy? Most brands have it backwards. Here's what we'd change 👇\n\n#ContentStrategy #MarketingLeadership" },
   ],
-  1: [ // Tuesday
-    { id: "w1a", platform: "Instagram", time: "11:00", tags: ["#ContentTips", "#BrandVoice"],    content: "3 things that actually grow your Instagram in 2025:\n\n1. Consistency > virality\n2. Comments > likes\n3. Saves = algorithm gold\n\nDouble tap if you're saving this 💜 #ContentTips #InstagramGrowth" },
+  1: [
+    { id: "w1a", platform: "Instagram", time: "11:00", tags: ["#ContentTips", "#BrandVoice"],    content: "3 things that actually grow your Instagram in 2025:\n\n1. Consistency > virality\n2. Comments > likes\n3. Saves = algorithm gold\n\nDouble tap if you're saving this #ContentTips #InstagramGrowth" },
     { id: "w1b", platform: "Twitter",   time: "15:00", tags: ["#SaaS", "#Marketing"],              content: "Hot take: Most 'social media strategies' are just posting schedules.\n\nA real strategy has: audience insight, voice guidelines, content pillars, and feedback loops.\n\nHow many of those does yours have? #MarketingStrategy" },
   ],
-  2: [ // Wednesday
+  2: [
     { id: "w2a", platform: "LinkedIn",  time: "10:00", tags: ["#Leadership", "#AI"],               content: "We've been experimenting with AI-generated content for 6 months.\n\nHere's what surprised us most: the best outputs came when we gave the AI our brand guidelines, not just a topic.\n\nContext is everything. #AIMarketing #ContentCreation" },
     { id: "w2b", platform: "Instagram", time: "18:00", tags: ["#BehindTheScenes", "#Startup"],     content: "Midweek check-in ✨\n\nOur team just hit a milestone we've been working toward for 3 months. We can't share the details yet — but we can say we're incredibly proud.\n\nStay tuned 👀 #BuildInPublic" },
   ],
-  3: [ // Thursday
+  3: [
     { id: "w3a", platform: "Twitter",   time: "09:00", tags: ["#ThrowbackThursday", "#Journey"],   content: "TBT to when our 'content calendar' was a sticky note on a monitor.\n\nNow it's AI-powered and schedules itself.\n\nGrowth is wild. 🙌 #ThrowbackThursday #FounderLife" },
     { id: "w3b", platform: "LinkedIn",  time: "16:00", tags: ["#DataDriven", "#Analytics"],        content: "Data point of the week: Posts published at 5–7 PM on weekdays get 34% more engagement than morning posts.\n\nWe've been running this experiment for 3 months.\n\nSave this and test it with your own audience 📊 #SocialMediaAnalytics" },
   ],
-  4: [ // Friday
-    { id: "w4a", platform: "Instagram", time: "12:00", tags: ["#FridayFeeling", "#TGIF"],          content: "It's Friday. You made it. 🎉\n\nQuick reminder: you don't need to post every day to grow. You need to post consistently with intention.\n\nSchedule your posts for next week this weekend. Your future self will thank you. 💜 #FridayFeeling #ContentCreator" },
+  4: [
+    { id: "w4a", platform: "Instagram", time: "12:00", tags: ["#FridayFeeling", "#TGIF"],          content: "It's Friday. You made it. 🎉\n\nQuick reminder: you don't need to post every day to grow. You need to post consistently with intention.\n\nSchedule your posts for next week this weekend. Your future self will thank you. #FridayFeeling #ContentCreator" },
     { id: "w4b", platform: "Twitter",   time: "17:00", tags: ["#WeekendRead", "#Marketing"],       content: "Weekend reading list for marketers:\n\n📖 'Building a Story Brand' by Donald Miller\n📖 'Contagious' by Jonah Berger\n📖 'This Is Marketing' by Seth Godin\n\nWhat's on your list? 👇 #MarketingBooks" },
   ],
-  5: [ // Saturday
+  5: [
     { id: "w5a", platform: "Instagram", time: "10:00", tags: ["#Weekend", "#ContentCreation"],     content: "Saturday content tip ☀️\n\nBatch create your week's content in one sitting. Pick a topic, write 5 variations, schedule them spread out.\n\nYou'll save 4+ hours every week and never run out of ideas.\n\nSave this post 📌 #ContentBatching #SocialMediaTips" },
   ],
-  6: [ // Sunday
+  6: [
     { id: "w6a", platform: "LinkedIn",  time: "19:00", tags: ["#SundayReflection", "#Growth"],     content: "Sunday reflection 🌙\n\nThis week I learned:\n→ Perfect is the enemy of published\n→ Your audience wants authenticity, not production value\n→ The best content answers a question your customer is already asking\n\nWhat did you learn this week? Share below 👇 #SundayReflection" },
   ],
 };
 
 // ── Status meta ──────────────────────────────────────────────────────────
 
-const STATUS_META: Record<Status, { label: string; color: string; icon: React.FC<{ className?: string }> }> = {
-  scheduled: { label: "Scheduled", color: "text-[#34d399] bg-[rgba(52,211,153,0.1)] border-[rgba(52,211,153,0.2)]",  icon: Clock },
-  failed:    { label: "Failed",    color: "text-[#f87171] bg-[rgba(248,113,113,0.1)] border-[rgba(248,113,113,0.2)]", icon: AlertCircle },
-  paused:    { label: "Paused",    color: "text-[#fbbf24] bg-[rgba(251,191,36,0.1)] border-[rgba(251,191,36,0.2)]",   icon: Pause },
+const STATUS_META: Record<Status, { label: string; color: string; bg: string; border: string; icon: React.FC<{ className?: string }> }> = {
+  scheduled: { label: "Scheduled", color: "var(--success)",   bg: "rgba(22,101,52,0.08)",   border: "rgba(22,101,52,0.2)",   icon: Clock },
+  failed:    { label: "Failed",    color: "var(--danger)",    bg: "rgba(155,28,28,0.08)",   border: "rgba(155,28,28,0.2)",   icon: AlertCircle },
+  paused:    { label: "Paused",    color: "var(--warning)",   bg: "rgba(146,64,14,0.08)",   border: "rgba(146,64,14,0.2)",   icon: Pause },
 };
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -141,11 +141,10 @@ const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satu
 // ── Page ───────────────────────────────────────────────────────────────────
 
 export default function ScheduledPage() {
-  const [tab, setTab]     = useState<Tab>("queue");
+  const [tab, setTab]       = useState<Tab>("queue");
   const [filter, setFilter] = useState<"all" | Status>("all");
   const [posts, setPosts]   = useState(mockPosts);
 
-  // Week plan state
   const weekDays = getWeekDays();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set(
     Object.values(WEEK_SUGGESTIONS).flat().map((p) => p.id)
@@ -187,28 +186,37 @@ export default function ScheduledPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-5 border-b border-[rgba(255,255,255,0.05)]">
+      <div className="flex items-center justify-between px-6 py-5 flex-wrap gap-3" style={{ borderBottom: "1px solid var(--border)" }}>
         <div>
-          <h1 className="text-lg font-semibold text-[#f1f3f9]">Scheduled Posts</h1>
-          <p className="text-xs text-[#4d5675] mt-0.5">
+          <h1 className="text-lg font-semibold" style={{ color: "var(--ink-primary)" }}>Scheduled Posts</h1>
+          <p className="text-xs mt-0.5" style={{ color: "var(--ink-tertiary)" }}>
             {counts.scheduled} queued · {counts.failed > 0 ? `${counts.failed} failed` : "all good"}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Tab switcher */}
-          <div className="flex items-center gap-0.5 rounded-xl bg-[rgba(255,255,255,0.04)] p-1">
+          <div className="flex items-center gap-0.5 rounded-xl p-1" style={{ backgroundColor: "var(--surface-100)" }}>
             <button onClick={() => setTab("queue")}
-              className={cn("flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
-                tab === "queue" ? "bg-[rgba(255,255,255,0.08)] text-[#f1f3f9]" : "text-[#4d5675] hover:text-[#8892aa]"
-              )}>
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all"
+              style={{
+                backgroundColor: tab === "queue" ? "var(--card)" : "transparent",
+                color: tab === "queue" ? "var(--ink-primary)" : "var(--ink-tertiary)",
+                boxShadow: tab === "queue" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+              }}>
               <Clock className="h-3.5 w-3.5" /> Queue
             </button>
             <button onClick={() => setTab("weekplan")}
-              className={cn("flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
-                tab === "weekplan" ? "bg-[rgba(255,255,255,0.08)] text-[#f1f3f9]" : "text-[#4d5675] hover:text-[#8892aa]"
-              )}>
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all"
+              style={{
+                backgroundColor: tab === "weekplan" ? "var(--card)" : "transparent",
+                color: tab === "weekplan" ? "var(--ink-primary)" : "var(--ink-tertiary)",
+                boxShadow: tab === "weekplan" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+              }}>
               <CalendarDays className="h-3.5 w-3.5" /> Week Plan
-              <span className="rounded-full bg-[rgba(97,114,243,0.2)] px-1.5 text-2xs text-[#8b9cf4]">AI</span>
+              <span className="rounded-full px-1.5 text-2xs font-medium"
+                style={{ backgroundColor: "rgba(23,122,65,0.12)", color: "var(--brand-500)" }}>
+                AI
+              </span>
             </button>
           </div>
           <Button size="sm" leftIcon={<Calendar className="h-3.5 w-3.5" />}>Schedule post</Button>
@@ -220,23 +228,33 @@ export default function ScheduledPage() {
         {/* ── Queue tab ── */}
         {tab === "queue" && (
           <motion.div key="queue" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col flex-1 min-h-0">
-            <div className="flex items-center gap-1.5 px-6 py-3 border-b border-[rgba(255,255,255,0.04)]">
+            <div className="flex items-center gap-1.5 px-6 py-3 flex-wrap" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
               {(["all", "scheduled", "failed", "paused"] as const).map((f) => (
                 <button key={f} onClick={() => setFilter(f)}
-                  className={cn("flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all capitalize",
-                    filter === f ? "bg-[rgba(255,255,255,0.08)] text-[#f1f3f9]" : "text-[#4d5675] hover:text-[#8892aa] hover:bg-[rgba(255,255,255,0.04)]"
-                  )}>
-                  {f === "failed" && <AlertCircle className="h-3 w-3 text-[#f87171]" />}
-                  {f === "paused" && <Pause className="h-3 w-3 text-[#fbbf24]" />}
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all capitalize"
+                  style={{
+                    backgroundColor: filter === f ? "var(--surface-100)" : "transparent",
+                    color: filter === f ? "var(--ink-primary)" : "var(--ink-tertiary)",
+                  }}>
+                  {f === "failed" && <AlertCircle className="h-3 w-3" style={{ color: "var(--danger)" }} />}
+                  {f === "paused" && <Pause className="h-3 w-3" style={{ color: "var(--warning)" }} />}
                   {f}
-                  <span className={cn("rounded-full px-1.5 py-0.5 text-2xs",
-                    filter === f ? "bg-[rgba(97,114,243,0.3)] text-[#8b9cf4]" : "bg-[rgba(255,255,255,0.06)] text-[#4d5675]")}>
+                  <span
+                    className="rounded-full px-1.5 py-0.5 text-2xs"
+                    style={{
+                      backgroundColor: filter === f ? "rgba(23,122,65,0.12)" : "var(--surface-100)",
+                      color: filter === f ? "var(--brand-500)" : "var(--ink-tertiary)",
+                    }}>
                     {counts[f]}
                   </span>
                 </button>
               ))}
               <div className="flex-1" />
-              <button className="flex items-center gap-1.5 rounded-lg border border-[rgba(255,255,255,0.07)] px-2.5 py-1.5 text-xs text-[#4d5675] hover:text-[#8892aa] transition-colors">
+              <button
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs transition-colors"
+                style={{ border: "1px solid var(--border)", color: "var(--ink-tertiary)" }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "var(--ink-secondary)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "var(--ink-tertiary)"; }}>
                 <Filter className="h-3 w-3" /> Platform
               </button>
             </div>
@@ -244,22 +262,24 @@ export default function ScheduledPage() {
             <div className="flex-1 overflow-y-auto">
               {Object.entries(grouped).length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(255,255,255,0.04)] mb-4">
-                    <Calendar className="h-6 w-6 text-[#4d5675]" />
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4" style={{ backgroundColor: "var(--surface-100)" }}>
+                    <Calendar className="h-6 w-6" style={{ color: "var(--ink-muted)" }} />
                   </div>
-                  <p className="text-sm font-medium text-[#8892aa]">No scheduled posts</p>
-                  <p className="text-xs text-[#4d5675] mt-1">Schedule a post or use the Week Plan</p>
+                  <p className="text-sm font-medium" style={{ color: "var(--ink-secondary)" }}>No scheduled posts</p>
+                  <p className="text-xs mt-1" style={{ color: "var(--ink-tertiary)" }}>Schedule a post or use the Week Plan</p>
                 </div>
               ) : (
                 <div className="px-6 py-4 space-y-6">
                   {Object.entries(grouped).map(([dateLabel, datePosts]) => (
                     <div key={dateLabel}>
                       <div className="flex items-center gap-3 mb-3">
-                        <span className={cn("text-xs font-semibold", isToday(datePosts[0].scheduledAt) ? "text-[#8b9cf4]" : "text-[#8892aa]")}>
+                        <span
+                          className="text-xs font-semibold"
+                          style={{ color: isToday(datePosts[0].scheduledAt) ? "var(--brand-500)" : "var(--ink-secondary)" }}>
                           {smartDateLabel(dateLabel, datePosts[0].scheduledAt)}
                         </span>
-                        <div className="h-px flex-1 bg-[rgba(255,255,255,0.05)]" />
-                        <span className="text-xs text-[#4d5675]">{datePosts.length} post{datePosts.length > 1 ? "s" : ""}</span>
+                        <div className="h-px flex-1" style={{ backgroundColor: "var(--border)" }} />
+                        <span className="text-xs" style={{ color: "var(--ink-tertiary)" }}>{datePosts.length} post{datePosts.length > 1 ? "s" : ""}</span>
                       </div>
                       <div className="space-y-2.5">
                         {datePosts.map((post, i) => {
@@ -268,40 +288,59 @@ export default function ScheduledPage() {
                           return (
                             <motion.div key={post.id}
                               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
-                              className="group flex gap-3 rounded-2xl border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.02)] p-4 hover:border-[rgba(255,255,255,0.12)] transition-all">
-                              <div className="w-16 shrink-0 pt-0.5">
-                                <div className="text-xs font-semibold text-[#f1f3f9] tabular-nums">{timeLabel(post.scheduledAt)}</div>
-                                <div className={cn("flex items-center gap-1 mt-1.5 rounded-full border px-1.5 py-0.5 text-2xs font-medium w-fit", meta.color)}>
-                                  <StatusIcon className="h-2.5 w-2.5" />
+                              className="group flex gap-4 rounded-2xl p-4 transition-all"
+                              style={{ border: "1px solid var(--border)", backgroundColor: "var(--card)" }}
+                              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--border-strong)"; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; }}>
+                              <div className="w-24 shrink-0 flex flex-col gap-1.5 pt-0.5">
+                                <div className="text-xs font-semibold tabular-nums" style={{ color: "var(--ink-primary)" }}>{timeLabel(post.scheduledAt)}</div>
+                                <div
+                                  className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-2xs font-medium w-fit whitespace-nowrap"
+                                  style={{ color: meta.color, backgroundColor: meta.bg, borderColor: meta.border }}>
+                                  <StatusIcon className="h-2.5 w-2.5 shrink-0" />
                                   {meta.label}
                                 </div>
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm text-[#f1f3f9] leading-relaxed line-clamp-2">{post.content}</p>
+                                <p className="text-sm leading-relaxed line-clamp-2" style={{ color: "var(--ink-primary)" }}>{post.content}</p>
                                 {post.imageUrl && (
-                                  <img src={post.imageUrl} alt="" className="mt-2.5 h-20 w-32 rounded-xl object-cover border border-[rgba(255,255,255,0.08)]" />
+                                  <img src={post.imageUrl} alt="" className="mt-2.5 h-20 w-32 rounded-xl object-cover"
+                                    style={{ border: "1px solid var(--border)" }} />
                                 )}
-                                <div className="flex items-center gap-1.5 mt-2.5">
+                                <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
                                   {post.platforms.map((p) => {
                                     const Icon = PLATFORM_ICONS[p];
                                     return Icon ? (
-                                      <span key={p} className="flex h-5 w-5 items-center justify-center rounded-md" style={{ backgroundColor: `${PLATFORM_COLORS[p]}18` }}>
+                                      <span key={p} className="flex h-5 w-5 items-center justify-center rounded-md"
+                                        style={{ backgroundColor: `${PLATFORM_COLORS[p]}15` }}>
                                         <span style={{ color: PLATFORM_COLORS[p] }}><Icon className="h-3 w-3" /></span>
                                       </span>
                                     ) : null;
                                   })}
-                                  <span className="text-2xs text-[#4d5675]">{post.platforms.join(", ")}</span>
+                                  <span className="text-2xs" style={{ color: "var(--ink-tertiary)" }}>{post.platforms.join(", ")}</span>
                                 </div>
                               </div>
                               <div className="flex items-start gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                                <button className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-[rgba(255,255,255,0.08)] text-[#4d5675] hover:text-[#f1f3f9] transition-colors">
+                                <button
+                                  className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
+                                  style={{ color: "var(--ink-tertiary)" }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--surface-100)"; e.currentTarget.style.color = "var(--ink-primary)"; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; e.currentTarget.style.color = "var(--ink-tertiary)"; }}>
                                   <Edit2 className="h-3.5 w-3.5" />
                                 </button>
-                                <button onClick={() => setPosts((p) => p.filter((x) => x.id !== post.id))}
-                                  className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-[rgba(239,68,68,0.1)] text-[#4d5675] hover:text-[#f87171] transition-colors">
+                                <button
+                                  onClick={() => setPosts((p) => p.filter((x) => x.id !== post.id))}
+                                  className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
+                                  style={{ color: "var(--ink-tertiary)" }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "rgba(155,28,28,0.08)"; e.currentTarget.style.color = "var(--danger)"; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; e.currentTarget.style.color = "var(--ink-tertiary)"; }}>
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </button>
-                                <button className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-[rgba(255,255,255,0.08)] text-[#4d5675] hover:text-[#f1f3f9] transition-colors">
+                                <button
+                                  className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
+                                  style={{ color: "var(--ink-tertiary)" }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--surface-100)"; e.currentTarget.style.color = "var(--ink-primary)"; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; e.currentTarget.style.color = "var(--ink-tertiary)"; }}>
                                   <ChevronRight className="h-3.5 w-3.5" />
                                 </button>
                               </div>
@@ -321,21 +360,23 @@ export default function ScheduledPage() {
         {tab === "weekplan" && (
           <motion.div key="weekplan" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col flex-1 min-h-0">
             {/* Week header */}
-            <div className="flex items-center justify-between px-6 py-3 border-b border-[rgba(255,255,255,0.04)]">
+            <div className="flex items-center justify-between px-6 py-3 flex-wrap gap-3"
+              style={{ borderBottom: "1px solid var(--border-subtle)" }}>
               <div className="flex items-center gap-2">
-                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-br from-[#6172f3] to-[#a855f7]">
+                <div className="flex h-6 w-6 items-center justify-center rounded-lg"
+                  style={{ background: "linear-gradient(135deg, var(--brand-500), var(--brand-600))" }}>
                   <Sparkles className="h-3.5 w-3.5 text-white" />
                 </div>
                 <div>
-                  <span className="text-xs font-semibold text-[#f1f3f9]">
+                  <span className="text-xs font-semibold" style={{ color: "var(--ink-primary)" }}>
                     Week of {weekDays[0].toLocaleDateString("en-US", { month: "short", day: "numeric" })} –{" "}
                     {weekDays[6].toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                   </span>
-                  <span className="text-2xs text-[#4d5675] ml-2">AI-generated brand content</span>
+                  <span className="text-2xs ml-2" style={{ color: "var(--ink-tertiary)" }}>AI-generated brand content</span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-[#4d5675]">{selectedCount} of {allWeekPosts.length} selected</span>
+                <span className="text-xs" style={{ color: "var(--ink-tertiary)" }}>{selectedCount} of {allWeekPosts.length} selected</span>
                 <Button size="sm" loading={scheduling} onClick={scheduleAll}
                   disabled={selectedCount === 0 || scheduled.size > 0}
                   leftIcon={scheduled.size > 0 ? <Check className="h-3.5 w-3.5" /> : <Calendar className="h-3.5 w-3.5" />}>
@@ -354,17 +395,21 @@ export default function ScheduledPage() {
                     {/* Day heading */}
                     <div className="flex items-center gap-3 mb-3">
                       <div className="flex items-center gap-2">
-                        <div className={cn("text-xs font-semibold", isToday(day) ? "text-[#8b9cf4]" : "text-[#8892aa]")}>
+                        <div className="text-xs font-semibold"
+                          style={{ color: isToday(day) ? "var(--brand-500)" : "var(--ink-secondary)" }}>
                           {DAY_NAMES[dayIdx]}
                         </div>
-                        <div className="text-2xs text-[#4d5675]">
+                        <div className="text-2xs" style={{ color: "var(--ink-tertiary)" }}>
                           {day.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                         </div>
                         {isToday(day) && (
-                          <span className="rounded-full bg-[rgba(97,114,243,0.2)] border border-[rgba(97,114,243,0.3)] px-2 py-0.5 text-2xs font-medium text-[#8b9cf4]">Today</span>
+                          <span className="rounded-full px-2 py-0.5 text-2xs font-medium"
+                            style={{ backgroundColor: "rgba(23,122,65,0.1)", border: "1px solid rgba(23,122,65,0.25)", color: "var(--brand-500)" }}>
+                            Today
+                          </span>
                         )}
                       </div>
-                      <div className="h-px flex-1 bg-[rgba(255,255,255,0.05)]" />
+                      <div className="h-px flex-1" style={{ backgroundColor: "var(--border)" }} />
                     </div>
 
                     <div className="space-y-2">
@@ -375,38 +420,47 @@ export default function ScheduledPage() {
                         const color = PLATFORM_COLORS[post.platform];
                         return (
                           <div key={post.id}
-                            className={cn("flex items-start gap-3 rounded-2xl border p-4 transition-all",
-                              isScheduledDone
-                                ? "border-[rgba(52,211,153,0.3)] bg-[rgba(52,211,153,0.05)]"
+                            className="flex items-start gap-3 rounded-2xl p-4 transition-all"
+                            style={{
+                              border: isScheduledDone
+                                ? "1px solid rgba(22,101,52,0.3)"
                                 : isSelected
-                                  ? "border-[rgba(97,114,243,0.3)] bg-[rgba(97,114,243,0.06)]"
-                                  : "border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.02)] opacity-60"
-                            )}>
+                                  ? "1px solid rgba(23,122,65,0.25)"
+                                  : "1px solid var(--border)",
+                              backgroundColor: isScheduledDone
+                                ? "rgba(22,101,52,0.05)"
+                                : isSelected
+                                  ? "rgba(23,122,65,0.04)"
+                                  : "var(--card)",
+                              opacity: !isSelected && !isScheduledDone ? 0.6 : 1,
+                            }}>
                             {/* Checkbox */}
-                            <button onClick={() => !isScheduledDone && toggleId(post.id)}
+                            <button
+                              onClick={() => !isScheduledDone && toggleId(post.id)}
                               disabled={isScheduledDone || isPast}
-                              className={cn("shrink-0 h-5 w-5 rounded-md border-2 flex items-center justify-center transition-all mt-0.5",
-                                isScheduledDone
-                                  ? "border-[#34d399] bg-[#34d399]"
-                                  : isSelected
-                                    ? "border-[#6172f3] bg-[#6172f3]"
-                                    : "border-[rgba(255,255,255,0.2)] hover:border-[rgba(97,114,243,0.5)]"
-                              )}>
+                              className="shrink-0 h-5 w-5 rounded-md border-2 flex items-center justify-center transition-all mt-0.5"
+                              style={{
+                                borderColor: isScheduledDone || isSelected ? "var(--brand-500)" : "var(--border-strong)",
+                                backgroundColor: isScheduledDone || isSelected ? "var(--brand-500)" : "transparent",
+                              }}>
                               {(isSelected || isScheduledDone) && <Check className="h-3 w-3 text-white" />}
                             </button>
 
                             {/* Platform badge */}
                             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg mt-0.5"
-                              style={{ backgroundColor: `${color}18`, border: `1px solid ${color}30`, color }}>
+                              style={{ backgroundColor: `${color}15`, border: `1px solid ${color}25`, color }}>
                               {Icon && <Icon className="h-3.5 w-3.5" />}
                             </div>
 
                             {/* Content */}
                             <div className="flex-1 min-w-0">
-                              <p className="text-xs text-[#c4cbdc] leading-relaxed line-clamp-3">{post.content}</p>
+                              <p className="text-xs leading-relaxed line-clamp-3" style={{ color: "var(--ink-secondary)" }}>{post.content}</p>
                               <div className="flex flex-wrap gap-1 mt-2">
                                 {post.tags.map((t) => (
-                                  <span key={t} className="text-2xs text-[#4d5675] bg-[rgba(255,255,255,0.05)] rounded-full px-2 py-0.5">{t}</span>
+                                  <span key={t} className="text-2xs rounded-full px-2 py-0.5"
+                                    style={{ color: "var(--ink-tertiary)", backgroundColor: "var(--surface-100)" }}>
+                                    {t}
+                                  </span>
                                 ))}
                               </div>
                             </div>
@@ -418,10 +472,15 @@ export default function ScheduledPage() {
                                 value={times[post.id] ?? post.time}
                                 onChange={(e) => setTimes((prev) => ({ ...prev, [post.id]: e.target.value }))}
                                 disabled={isScheduledDone}
-                                className="h-8 w-24 rounded-lg bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.1)] px-2 text-xs text-[#f1f3f9] focus:outline-none focus:border-[rgba(97,114,243,0.5)] [color-scheme:dark] disabled:opacity-50"
+                                className="h-8 w-24 rounded-lg px-2 text-xs focus:outline-none focus:ring-2 disabled:opacity-50"
+                                style={{
+                                  backgroundColor: "var(--surface-50)",
+                                  border: "1px solid var(--border-strong)",
+                                  color: "var(--ink-primary)",
+                                }}
                               />
                               {isScheduledDone && (
-                                <span className="text-2xs text-[#34d399] flex items-center gap-1">
+                                <span className="text-2xs flex items-center gap-1" style={{ color: "var(--success)" }}>
                                   <CheckCircle2 className="h-3 w-3" /> Scheduled
                                 </span>
                               )}
@@ -435,14 +494,15 @@ export default function ScheduledPage() {
               })}
 
               {/* Bottom CTA */}
-              <div className="flex items-center justify-between rounded-2xl border border-[rgba(97,114,243,0.2)] bg-[rgba(97,114,243,0.06)] px-5 py-4">
+              <div className="flex items-center justify-between rounded-2xl px-5 py-4 flex-wrap gap-3"
+                style={{ border: "1px solid rgba(23,122,65,0.2)", backgroundColor: "rgba(23,122,65,0.04)" }}>
                 <div>
-                  <p className="text-sm font-semibold text-[#f1f3f9]">{selectedCount} posts ready to schedule</p>
-                  <p className="text-xs text-[#4d5675]">Posts will go live at your selected times. You can edit any post before publishing.</p>
+                  <p className="text-sm font-semibold" style={{ color: "var(--ink-primary)" }}>{selectedCount} posts ready to schedule</p>
+                  <p className="text-xs" style={{ color: "var(--ink-tertiary)" }}>Posts will go live at your selected times. You can edit any post before publishing.</p>
                 </div>
                 <Button size="sm" loading={scheduling} onClick={scheduleAll}
                   disabled={selectedCount === 0 || scheduled.size > 0}>
-                  {scheduled.size > 0 ? "✓ All scheduled" : `Schedule ${selectedCount} posts`}
+                  {scheduled.size > 0 ? "All scheduled" : `Schedule ${selectedCount} posts`}
                 </Button>
               </div>
             </div>

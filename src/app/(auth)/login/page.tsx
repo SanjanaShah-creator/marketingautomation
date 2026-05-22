@@ -1,19 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Zap, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Zap, ArrowRight, X, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-function GithubIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
-    </svg>
-  );
-}
+import { motion, AnimatePresence } from "framer-motion";
 
 function GoogleIcon({ className }: { className?: string }) {
   return (
@@ -26,16 +19,70 @@ function GoogleIcon({ className }: { className?: string }) {
   );
 }
 
+function OtpInput({ code, onChange }: { code: string[]; onChange: (c: string[]) => void }) {
+  const refs = useRef<(HTMLInputElement | null)[]>([]);
+
+  function handleChange(i: number, val: string) {
+    if (!/^\d*$/.test(val)) return;
+    const next = [...code];
+    next[i] = val.slice(-1);
+    onChange(next);
+    if (val && i < 5) refs.current[i + 1]?.focus();
+  }
+
+  function handleKeyDown(i: number, e: React.KeyboardEvent) {
+    if (e.key === "Backspace" && !code[i] && i > 0) refs.current[i - 1]?.focus();
+  }
+
+  return (
+    <div className="flex justify-center gap-2">
+      {code.map((digit, i) => (
+        <input
+          key={i}
+          ref={(el) => { refs.current[i] = el; }}
+          type="text"
+          inputMode="numeric"
+          maxLength={1}
+          value={digit}
+          onChange={(e) => handleChange(i, e.target.value)}
+          onKeyDown={(e) => handleKeyDown(i, e)}
+          className="h-14 w-11 rounded-xl text-center text-xl font-bold transition-all focus:outline-none focus:ring-2"
+          style={{
+            backgroundColor: "var(--surface-50)",
+            border: `1.5px solid ${digit ? "var(--brand-500)" : "var(--border)"}`,
+            color: "var(--ink-primary)",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
+  const [show2Fa, setShow2Fa] = useState(false);
+  const [twoFaCode, setTwoFaCode] = useState(["", "", "", "", "", ""]);
+  const [verifying2Fa, setVerifying2Fa] = useState(false);
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     await new Promise((r) => setTimeout(r, 1200));
+    setLoading(false);
+    if (form.email.includes("2fa")) {
+      setShow2Fa(true);
+    } else {
+      router.push("/dashboard");
+    }
+  }
+
+  async function handleVerify2Fa() {
+    setVerifying2Fa(true);
+    await new Promise((r) => setTimeout(r, 900));
+    setVerifying2Fa(false);
     router.push("/dashboard");
   }
 
@@ -43,34 +90,29 @@ export default function LoginPage() {
     <div className="animate-fade-up">
       {/* Logo */}
       <div className="mb-8 flex flex-col items-center gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6172f3] to-[#a855f7] shadow-[0_0_24px_rgba(97,114,243,0.5)]">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl"
+          style={{ background: "linear-gradient(135deg, var(--brand-500), var(--brand-600))", boxShadow: "0 0 24px rgba(23,122,65,0.35)" }}>
           <Zap className="h-6 w-6 text-white" strokeWidth={2.5} />
         </div>
         <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-[#f1f3f9]">Welcome back</h1>
-          <p className="mt-1 text-sm text-[#8892aa]">Sign in to your SocialSync workspace</p>
+          <h1 className="text-2xl font-bold tracking-tight" style={{ color: "var(--ink-primary)" }}>Welcome back</h1>
+          <p className="mt-1 text-sm" style={{ color: "var(--ink-tertiary)" }}>Sign in to your SocialSync workspace</p>
         </div>
       </div>
 
       {/* Card */}
-      <div className="glass rounded-3xl p-6 shadow-[0_24px_64px_rgba(0,0,0,0.6)]">
-        {/* OAuth */}
-        <div className="mb-5 grid grid-cols-2 gap-2.5">
-          <Button variant="secondary" size="sm" className="w-full gap-2">
-            <GithubIcon className="h-4 w-4" />
-            GitHub
-          </Button>
-          <Button variant="secondary" size="sm" className="w-full gap-2">
-            <GoogleIcon className="h-4 w-4" />
-            Google
-          </Button>
-        </div>
+      <div className="rounded-3xl p-6 shadow-sm" style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}>
+        {/* Google OAuth */}
+        <Button variant="secondary" size="sm" className="w-full gap-2 mb-5">
+          <GoogleIcon className="h-4 w-4" />
+          Continue with Google
+        </Button>
 
         {/* Divider */}
         <div className="relative mb-5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-[rgba(255,255,255,0.06)]" />
-          <span className="text-xs text-[#4d5675]">or continue with email</span>
-          <div className="h-px flex-1 bg-[rgba(255,255,255,0.06)]" />
+          <div className="h-px flex-1" style={{ backgroundColor: "var(--border)" }} />
+          <span className="text-xs" style={{ color: "var(--ink-tertiary)" }}>or continue with email</span>
+          <div className="h-px flex-1" style={{ backgroundColor: "var(--border)" }} />
         </div>
 
         {/* Form */}
@@ -86,8 +128,9 @@ export default function LoginPage() {
           />
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-medium text-[#8892aa]">Password</label>
-              <Link href="/forgot-password" className="text-xs text-[#818cf8] hover:text-[#6172f3] transition-colors">
+              <label className="text-sm font-medium" style={{ color: "var(--ink-secondary)" }}>Password</label>
+              <Link href="/forgot-password" className="text-xs font-medium transition-colors"
+                style={{ color: "var(--brand-500)" }}>
                 Forgot password?
               </Link>
             </div>
@@ -99,12 +142,19 @@ export default function LoginPage() {
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 required
                 autoComplete="current-password"
-                className="flex h-9 w-full rounded-[0.625rem] bg-[rgba(255,255,255,0.04)] px-3 py-2 pr-10 text-sm text-[#f1f3f9] border border-[rgba(255,255,255,0.08)] placeholder:text-[#4d5675] transition-all duration-150 hover:border-[rgba(255,255,255,0.14)] focus:border-[rgba(97,114,243,0.6)] focus:bg-[rgba(255,255,255,0.06)] focus:outline-none focus:ring-[3px] focus:ring-[rgba(97,114,243,0.12)]"
+                className="flex h-10 w-full rounded-[0.625rem] px-3 py-2 pr-10 text-sm transition-all focus:outline-none focus:ring-2"
+                style={{
+                  backgroundColor: "var(--surface-50)",
+                  border: "1px solid var(--border-strong)",
+                  color: "var(--ink-primary)",
+                  "--tw-ring-color": "rgba(23,122,65,0.25)",
+                } as React.CSSProperties}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4d5675] hover:text-[#8892aa] transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                style={{ color: "var(--ink-tertiary)" }}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -123,12 +173,72 @@ export default function LoginPage() {
         </form>
       </div>
 
-      <p className="mt-5 text-center text-sm text-[#4d5675]">
+      <p className="mt-5 text-center text-sm" style={{ color: "var(--ink-tertiary)" }}>
         Don&apos;t have an account?{" "}
-        <Link href="/signup" className="text-[#818cf8] hover:text-[#6172f3] font-medium transition-colors">
+        <Link href="/signup" className="font-medium transition-colors" style={{ color: "var(--brand-500)" }}>
           Create one free
         </Link>
       </p>
+
+      {/* 2FA Modal */}
+      <AnimatePresence>
+        {show2Fa && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: -16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -16 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed left-1/2 top-1/2 z-50 w-full max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-2xl p-6 shadow-xl"
+              style={{ backgroundColor: "var(--card)", border: "1px solid var(--border-strong)" }}
+            >
+              <button
+                onClick={() => setShow2Fa(false)}
+                className="absolute right-4 top-4 rounded-lg p-1 transition-colors"
+                style={{ color: "var(--ink-tertiary)" }}
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              <div className="flex flex-col items-center gap-2 mb-6 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl"
+                  style={{ backgroundColor: "rgba(23,122,65,0.1)" }}>
+                  <ShieldCheck className="h-6 w-6" style={{ color: "var(--brand-500)" }} />
+                </div>
+                <h2 className="text-base font-semibold" style={{ color: "var(--ink-primary)" }}>Two-factor authentication</h2>
+                <p className="text-sm" style={{ color: "var(--ink-tertiary)" }}>
+                  Enter the 6-digit code from your authenticator app
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <OtpInput code={twoFaCode} onChange={setTwoFaCode} />
+
+                <Button
+                  className="w-full"
+                  size="lg"
+                  loading={verifying2Fa}
+                  disabled={twoFaCode.some((d) => !d)}
+                  onClick={handleVerify2Fa}
+                >
+                  Verify
+                </Button>
+
+                <p className="text-center text-xs" style={{ color: "var(--ink-tertiary)" }}>
+                  Lost access to your app?{" "}
+                  <button className="font-medium transition-colors" style={{ color: "var(--brand-500)" }}>
+                    Use a recovery code
+                  </button>
+                </p>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

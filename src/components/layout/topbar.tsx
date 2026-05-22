@@ -59,7 +59,6 @@ export function Topbar() {
   const [unread] = useState(2);
 
   async function handleSignOut() {
-    // NextAuth v5 sign-out — POST to the signout endpoint
     await fetch("/api/auth/signout", { method: "POST" });
     router.push("/login");
   }
@@ -67,22 +66,28 @@ export function Topbar() {
   const title = Object.entries(PAGE_TITLES).find(([key]) => pathname === key || pathname.startsWith(key + "/"))?.[1] ?? "Dashboard";
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-[rgba(255,255,255,0.05)] bg-[#0d0f17]/80 backdrop-blur-xl px-5 sticky top-0 z-40">
+    <header
+      className="flex h-14 shrink-0 items-center justify-between border-b px-5 sticky top-0 z-40 backdrop-blur-xl"
+      style={{ backgroundColor: "var(--topbar-bg)", borderColor: "var(--border)" }}
+    >
       {/* Left — page title */}
       <div className="flex items-center gap-3">
-        <h1 className="text-sm font-semibold text-[#f1f3f9]">{title}</h1>
+        <h1 className="text-sm font-semibold" style={{ color: "var(--ink-primary)" }}>{title}</h1>
       </div>
 
       {/* Center — search trigger */}
       <button
         onClick={() => setSearchOpen(true)}
-        className="hidden md:flex items-center gap-2 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.07)] px-3 py-1.5 text-sm text-[#4d5675] hover:border-[rgba(255,255,255,0.12)] hover:text-[#8892aa] transition-all w-56"
+        className="hidden md:flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm transition-all w-56 border"
+        style={{ backgroundColor: "var(--border-subtle)", borderColor: "var(--border)", color: "var(--ink-tertiary)" }}
+        onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--border-strong)"; e.currentTarget.style.color = "var(--ink-secondary)"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--ink-tertiary)"; }}
       >
         <Search className="h-3.5 w-3.5" />
         <span className="flex-1 text-left text-xs">Search everything…</span>
         <div className="flex items-center gap-0.5">
-          <kbd className="flex h-4 items-center rounded bg-[rgba(255,255,255,0.08)] px-1 text-2xs font-mono">⌘</kbd>
-          <kbd className="flex h-4 items-center rounded bg-[rgba(255,255,255,0.08)] px-1 text-2xs font-mono">K</kbd>
+          <kbd className="flex h-4 items-center rounded px-1 text-2xs font-mono" style={{ backgroundColor: "var(--border)" }}>⌘</kbd>
+          <kbd className="flex h-4 items-center rounded px-1 text-2xs font-mono" style={{ backgroundColor: "var(--border)" }}>K</kbd>
         </div>
       </button>
 
@@ -91,7 +96,10 @@ export function Topbar() {
         {/* Search icon (mobile) */}
         <button
           onClick={() => setSearchOpen(true)}
-          className="flex md:hidden h-8 w-8 items-center justify-center rounded-lg text-[#4d5675] hover:text-[#8892aa] hover:bg-[rgba(255,255,255,0.06)] transition-all"
+          className="flex md:hidden h-8 w-8 items-center justify-center rounded-lg transition-all"
+          style={{ color: "var(--ink-tertiary)" }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--border-subtle)"; e.currentTarget.style.color = "var(--ink-secondary)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; e.currentTarget.style.color = "var(--ink-tertiary)"; }}
         >
           <Search className="h-4 w-4" />
         </button>
@@ -105,17 +113,19 @@ export function Topbar() {
         <div className="relative">
           <button
             onClick={() => setNotifOpen(!notifOpen)}
-            className="relative flex h-8 w-8 items-center justify-center rounded-lg text-[#4d5675] hover:text-[#8892aa] hover:bg-[rgba(255,255,255,0.06)] transition-all"
+            className="relative flex h-8 w-8 items-center justify-center rounded-lg transition-all"
+            style={{ color: "var(--ink-tertiary)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--border-subtle)"; e.currentTarget.style.color = "var(--ink-secondary)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; e.currentTarget.style.color = "var(--ink-tertiary)"; }}
           >
             <Bell className="h-4 w-4" />
             {unread > 0 && (
-              <span className="absolute top-1 right-1 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-[#6172f3] text-white text-[8px] font-bold leading-none">
+              <span className="absolute top-1 right-1 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-[#177A41] text-white text-[8px] font-bold leading-none">
                 {unread}
               </span>
             )}
           </button>
 
-          {/* Notification dropdown */}
           <AnimatePresence>
             {notifOpen && (
               <>
@@ -125,14 +135,20 @@ export function Topbar() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.97 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-full z-50 mt-2 w-80 rounded-2xl border border-[rgba(255,255,255,0.08)] bg-[#111420] shadow-[0_24px_60px_rgba(0,0,0,0.7)] overflow-hidden"
+                  className="absolute right-0 top-full z-50 mt-2 w-80 rounded-2xl shadow-[0_24px_60px_rgba(0,0,0,0.35)] overflow-hidden border"
+                  style={{ backgroundColor: "var(--card)", borderColor: "var(--border)" }}
                 >
-                  <div className="flex items-center justify-between p-4 border-b border-[rgba(255,255,255,0.06)]">
+                  <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: "var(--border)" }}>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-[#f1f3f9]">Notifications</span>
+                      <span className="text-sm font-semibold" style={{ color: "var(--ink-primary)" }}>Notifications</span>
                       {unread > 0 && <Badge variant="default" className="px-1.5 py-0 text-2xs">{unread} new</Badge>}
                     </div>
-                    <button className="text-2xs text-[#4d5675] hover:text-[#8892aa] transition-colors">
+                    <button
+                      className="text-2xs transition-colors"
+                      style={{ color: "var(--ink-tertiary)" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = "var(--ink-secondary)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = "var(--ink-tertiary)"; }}
+                    >
                       Mark all read
                     </button>
                   </div>
@@ -143,23 +159,31 @@ export function Topbar() {
                         <div
                           key={n.id}
                           className={cn(
-                            "flex items-start gap-3 p-4 hover:bg-[rgba(255,255,255,0.04)] transition-colors cursor-pointer",
-                            i < mockNotifications.length - 1 && "border-b border-[rgba(255,255,255,0.04)]",
-                            i < unread && "bg-[rgba(97,114,243,0.04)]"
+                            "flex items-start gap-3 p-4 cursor-pointer transition-colors",
+                            i < mockNotifications.length - 1 && "border-b",
+                            i < unread ? "bg-[rgba(97,114,243,0.04)]" : ""
                           )}
+                          style={{ borderColor: "var(--border-subtle)" }}
+                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--border-subtle)"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = i < unread ? "rgba(97,114,243,0.04)" : ""; }}
                         >
                           <Icon className={cn("h-4 w-4 shrink-0 mt-0.5", notifColors[n.type])} />
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-[#f1f3f9]">{n.title}</p>
-                            <p className="text-xs text-[#8892aa] mt-0.5">{n.body}</p>
-                            <p className="text-2xs text-[#4d5675] mt-1">{formatRelativeTime(n.time)}</p>
+                            <p className="text-xs font-medium" style={{ color: "var(--ink-primary)" }}>{n.title}</p>
+                            <p className="text-xs mt-0.5" style={{ color: "var(--ink-secondary)" }}>{n.body}</p>
+                            <p className="text-2xs mt-1" style={{ color: "var(--ink-tertiary)" }}>{formatRelativeTime(n.time)}</p>
                           </div>
                         </div>
                       );
                     })}
                   </div>
-                  <div className="p-2 border-t border-[rgba(255,255,255,0.06)]">
-                    <button className="w-full rounded-lg py-2 text-xs text-[#818cf8] hover:bg-[rgba(97,114,243,0.08)] transition-colors">
+                  <div className="p-2 border-t" style={{ borderColor: "var(--border)" }}>
+                    <button
+                      className="w-full rounded-lg py-2 text-xs font-medium transition-colors"
+                      style={{ color: "var(--brand-500)" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--border-subtle)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; }}
+                    >
                       View all notifications
                     </button>
                   </div>
@@ -187,25 +211,30 @@ export function Topbar() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.97 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-full z-50 mt-2 w-64 rounded-2xl border border-[rgba(255,255,255,0.08)] bg-[#111420] shadow-[0_24px_60px_rgba(0,0,0,0.7)] overflow-hidden"
+                  className="absolute right-0 top-full z-50 mt-2 w-64 rounded-2xl shadow-[0_24px_60px_rgba(0,0,0,0.35)] overflow-hidden border"
+                  style={{ backgroundColor: "var(--card)", borderColor: "var(--border)" }}
                 >
                   {/* User info */}
-                  <div className="flex items-center gap-3 p-4 border-b border-[rgba(255,255,255,0.06)]">
+                  <div className="flex items-center gap-3 p-4 border-b" style={{ borderColor: "var(--border)" }}>
                     <UserAvatar name="Alex Johnson" size="md" />
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-[#f1f3f9] truncate">Alex Johnson</p>
-                      <p className="text-xs text-[#4d5675] truncate">alex@company.com</p>
+                      <p className="text-sm font-semibold truncate" style={{ color: "var(--ink-primary)" }}>Alex Johnson</p>
+                      <p className="text-xs truncate" style={{ color: "var(--ink-tertiary)" }}>alex@company.com</p>
                     </div>
                   </div>
 
                   {/* Menu items */}
                   <div className="p-1.5">
                     {[
-                      { icon: User,     label: "Your profile",  href: "/settings" },
-                      { icon: Settings, label: "Settings",       href: "/settings" },
+                      { icon: User,     label: "Your profile", href: "/settings" },
+                      { icon: Settings, label: "Settings",      href: "/settings" },
                     ].map(({ icon: Icon, label, href }) => (
                       <button key={label} onClick={() => { setProfileOpen(false); router.push(href); }}
-                        className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-[#8892aa] hover:bg-[rgba(255,255,255,0.05)] hover:text-[#f1f3f9] transition-colors group">
+                        className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm transition-colors group"
+                        style={{ color: "var(--ink-secondary)" }}
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--border-subtle)"; e.currentTarget.style.color = "var(--ink-primary)"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; e.currentTarget.style.color = "var(--ink-secondary)"; }}
+                      >
                         <Icon className="h-4 w-4 shrink-0" />
                         <span className="flex-1 text-left">{label}</span>
                         <ChevronRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -214,20 +243,26 @@ export function Topbar() {
                   </div>
 
                   {/* Workspace badge */}
-                  <div className="mx-3 mb-2 rounded-xl bg-[rgba(97,114,243,0.08)] border border-[rgba(97,114,243,0.15)] px-3 py-2.5">
+                  <div className="mx-3 mb-2 rounded-xl px-3 py-2.5 border"
+                    style={{ backgroundColor: "rgba(107,191,138,0.08)", borderColor: "rgba(107,191,138,0.15)" }}>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs font-medium text-[#f1f3f9]">Acme Inc.</p>
-                        <p className="text-2xs text-[#4d5675]">Growth plan · 50 AI credits left</p>
+                        <p className="text-xs font-medium" style={{ color: "var(--ink-primary)" }}>Acme Inc.</p>
+                        <p className="text-2xs" style={{ color: "var(--ink-tertiary)" }}>Growth plan · 50 AI credits left</p>
                       </div>
-                      <span className="rounded-full bg-[rgba(97,114,243,0.2)] px-2 py-0.5 text-2xs font-medium text-[#8b9cf4]">Growth</span>
+                      <span className="rounded-full px-2 py-0.5 text-2xs font-medium"
+                        style={{ backgroundColor: "rgba(107,191,138,0.2)", color: "var(--brand-500)" }}>Growth</span>
                     </div>
                   </div>
 
                   {/* Sign out */}
-                  <div className="p-1.5 border-t border-[rgba(255,255,255,0.06)]">
+                  <div className="p-1.5 border-t" style={{ borderColor: "var(--border)" }}>
                     <button onClick={handleSignOut}
-                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-[#f87171] hover:bg-[rgba(239,68,68,0.08)] transition-colors">
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm transition-colors"
+                      style={{ color: "var(--danger)" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; }}
+                    >
                       <LogOut className="h-4 w-4 shrink-0" />
                       Sign out
                     </button>
@@ -247,7 +282,8 @@ export function Topbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-[rgba(0,0,0,0.7)] backdrop-blur-sm"
+              className="fixed inset-0 z-50 backdrop-blur-sm"
+              style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
               onClick={() => setSearchOpen(false)}
             />
             <motion.div
@@ -255,43 +291,49 @@ export function Topbar() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.97, y: -20 }}
               transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed left-1/2 top-20 z-50 w-full max-w-lg -translate-x-1/2 rounded-2xl border border-[rgba(255,255,255,0.1)] bg-[#111420] shadow-[0_32px_80px_rgba(0,0,0,0.8)] overflow-hidden"
+              className="fixed left-1/2 top-20 z-50 w-full max-w-lg -translate-x-1/2 rounded-2xl shadow-[0_32px_80px_rgba(0,0,0,0.5)] overflow-hidden border"
+              style={{ backgroundColor: "var(--card)", borderColor: "var(--border-strong)" }}
             >
-              <div className="flex items-center gap-3 p-4 border-b border-[rgba(255,255,255,0.06)]">
-                <Search className="h-4 w-4 text-[#4d5675] shrink-0" />
+              <div className="flex items-center gap-3 p-4 border-b" style={{ borderColor: "var(--border)" }}>
+                <Search className="h-4 w-4 shrink-0" style={{ color: "var(--ink-tertiary)" }} />
                 <input
                   autoFocus
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search posts, accounts, settings…"
-                  className="flex-1 bg-transparent text-sm text-[#f1f3f9] placeholder:text-[#4d5675] focus:outline-none"
+                  className="flex-1 bg-transparent text-sm focus:outline-none placeholder:text-[var(--ink-tertiary)]"
+                  style={{ color: "var(--ink-primary)" }}
                 />
                 {searchQuery && (
-                  <button onClick={() => setSearchQuery("")} className="text-[#4d5675] hover:text-[#8892aa] transition-colors">
+                  <button onClick={() => setSearchQuery("")} style={{ color: "var(--ink-tertiary)" }}>
                     <X className="h-4 w-4" />
                   </button>
                 )}
-                <kbd className="flex items-center rounded bg-[rgba(255,255,255,0.06)] px-1.5 py-0.5 text-xs text-[#4d5675] font-mono">ESC</kbd>
+                <kbd className="flex items-center rounded px-1.5 py-0.5 text-xs font-mono"
+                  style={{ backgroundColor: "var(--border)", color: "var(--ink-tertiary)" }}>ESC</kbd>
               </div>
               <div className="p-2">
                 {["Dashboard", "Compose Post", "Calendar", "Social Accounts", "Team Settings"].map((item) => (
                   <button
                     key={item}
                     onClick={() => setSearchOpen(false)}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#8892aa] hover:bg-[rgba(255,255,255,0.05)] hover:text-[#f1f3f9] transition-colors"
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors"
+                    style={{ color: "var(--ink-secondary)" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--border-subtle)"; e.currentTarget.style.color = "var(--ink-primary)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; e.currentTarget.style.color = "var(--ink-secondary)"; }}
                   >
-                    <Command className="h-3.5 w-3.5 text-[#4d5675] shrink-0" />
+                    <Command className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--ink-tertiary)" }} />
                     {item}
                   </button>
                 ))}
               </div>
-              <div className="border-t border-[rgba(255,255,255,0.06)] px-4 py-2 flex items-center gap-4">
-                <div className="flex items-center gap-1.5 text-2xs text-[#4d5675]">
-                  <kbd className="flex h-4 items-center rounded bg-[rgba(255,255,255,0.08)] px-1 font-mono">↑↓</kbd>
+              <div className="border-t px-4 py-2 flex items-center gap-4" style={{ borderColor: "var(--border)" }}>
+                <div className="flex items-center gap-1.5 text-2xs" style={{ color: "var(--ink-tertiary)" }}>
+                  <kbd className="flex h-4 items-center rounded px-1 font-mono" style={{ backgroundColor: "var(--border)" }}>↑↓</kbd>
                   Navigate
                 </div>
-                <div className="flex items-center gap-1.5 text-2xs text-[#4d5675]">
-                  <kbd className="flex h-4 items-center rounded bg-[rgba(255,255,255,0.08)] px-1 font-mono">↵</kbd>
+                <div className="flex items-center gap-1.5 text-2xs" style={{ color: "var(--ink-tertiary)" }}>
+                  <kbd className="flex h-4 items-center rounded px-1 font-mono" style={{ backgroundColor: "var(--border)" }}>↵</kbd>
                   Open
                 </div>
               </div>

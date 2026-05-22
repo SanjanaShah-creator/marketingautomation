@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle2, AlertCircle, Clock, Users, Sparkles,
-  Info, Bell, Check, Trash2, Filter,
+  Info, Bell, Check, Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,14 +35,14 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
 ];
 
 const TYPE_META: Record<NotificationType, { icon: React.FC<{className?: string}>; color: string; bg: string }> = {
-  POST_PUBLISHED:      { icon: CheckCircle2, color: "text-[#34d399]", bg: "bg-[rgba(16,185,129,0.12)]" },
-  POST_FAILED:         { icon: AlertCircle,  color: "text-[#f87171]", bg: "bg-[rgba(239,68,68,0.12)]" },
-  POST_SCHEDULED:      { icon: Clock,        color: "text-[#818cf8]", bg: "bg-[rgba(97,114,243,0.12)]" },
-  TEAM_INVITE:         { icon: Users,        color: "text-[#60a5fa]", bg: "bg-[rgba(59,130,246,0.12)]" },
-  TEAM_JOINED:         { icon: Users,        color: "text-[#60a5fa]", bg: "bg-[rgba(59,130,246,0.12)]" },
-  AI_CREDITS_LOW:      { icon: Sparkles,     color: "text-[#a78bfa]", bg: "bg-[rgba(167,139,250,0.12)]" },
-  ACCOUNT_DISCONNECTED:{ icon: AlertCircle,  color: "text-[#fbbf24]", bg: "bg-[rgba(245,158,11,0.12)]" },
-  SYSTEM:              { icon: Info,         color: "text-[#60a5fa]", bg: "bg-[rgba(59,130,246,0.12)]" },
+  POST_PUBLISHED:      { icon: CheckCircle2, color: "var(--success)",  bg: "rgba(22,101,52,0.08)" },
+  POST_FAILED:         { icon: AlertCircle,  color: "var(--danger)",   bg: "rgba(155,28,28,0.08)" },
+  POST_SCHEDULED:      { icon: Clock,        color: "var(--brand-500)", bg: "rgba(23,122,65,0.08)" },
+  TEAM_INVITE:         { icon: Users,        color: "var(--info)",     bg: "rgba(30,58,138,0.08)" },
+  TEAM_JOINED:         { icon: Users,        color: "var(--info)",     bg: "rgba(30,58,138,0.08)" },
+  AI_CREDITS_LOW:      { icon: Sparkles,     color: "var(--warning)",  bg: "rgba(146,64,14,0.08)" },
+  ACCOUNT_DISCONNECTED:{ icon: AlertCircle,  color: "var(--warning)",  bg: "rgba(146,64,14,0.08)" },
+  SYSTEM:              { icon: Info,         color: "var(--info)",     bg: "rgba(30,58,138,0.08)" },
 };
 
 type FilterType = "ALL" | "UNREAD" | NotificationType;
@@ -91,12 +91,12 @@ export default function NotificationsPage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-base font-semibold text-[#f1f3f9]">Notifications</h2>
+            <h2 className="text-base font-semibold" style={{ color: "var(--ink-primary)" }}>Notifications</h2>
             {unreadCount > 0 && (
               <Badge variant="default" className="text-2xs">{unreadCount} new</Badge>
             )}
           </div>
-          <p className="text-xs text-[#4d5675]">Stay updated on your workspace activity</p>
+          <p className="text-sm" style={{ color: "var(--ink-tertiary)" }}>Stay updated on your workspace activity</p>
         </div>
         {unreadCount > 0 && (
           <Button variant="ghost" size="xs" leftIcon={<Check className="h-3.5 w-3.5" />} onClick={markAllRead}>
@@ -106,17 +106,17 @@ export default function NotificationsPage() {
       </div>
 
       {/* Filter tabs */}
-      <div className="flex items-center gap-1 p-1 rounded-xl bg-[rgba(255,255,255,0.04)] w-fit">
+      <div className="flex items-center gap-1 p-1 rounded-xl w-fit" style={{ backgroundColor: "var(--surface-100)" }}>
         {FILTER_OPTIONS.map(({ id, label }) => (
           <button
             key={id}
             onClick={() => setFilter(id)}
-            className={cn(
-              "rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
-              filter === id
-                ? "bg-[rgba(255,255,255,0.1)] text-[#f1f3f9]"
-                : "text-[#4d5675] hover:text-[#8892aa]"
-            )}
+            className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all"
+            style={{
+              backgroundColor: filter === id ? "var(--card)" : "transparent",
+              color: filter === id ? "var(--ink-primary)" : "var(--ink-tertiary)",
+              boxShadow: filter === id ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+            }}
           >
             {label}
           </button>
@@ -125,10 +125,11 @@ export default function NotificationsPage() {
 
       {/* Notification list */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)] py-20">
-          <Bell className="h-10 w-10 text-[#2e3554] mb-3" />
-          <p className="text-sm font-medium text-[#4d5675]">All caught up!</p>
-          <p className="text-xs text-[#2e3554] mt-1">No notifications to show</p>
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed py-20"
+          style={{ borderColor: "var(--border)", backgroundColor: "var(--surface-50)" }}>
+          <Bell className="h-10 w-10 mb-3" style={{ color: "var(--ink-muted)" }} />
+          <p className="text-sm font-medium" style={{ color: "var(--ink-secondary)" }}>All caught up!</p>
+          <p className="text-xs mt-1" style={{ color: "var(--ink-tertiary)" }}>No notifications to show</p>
         </div>
       ) : (
         <div className="space-y-1.5">
@@ -143,35 +144,37 @@ export default function NotificationsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -20, height: 0, marginBottom: 0 }}
                   transition={{ duration: 0.2 }}
-                  className={cn(
-                    "group flex items-start gap-4 rounded-2xl border p-4 transition-all",
-                    !notif.read
-                      ? "bg-[rgba(97,114,243,0.04)] border-[rgba(97,114,243,0.12)]"
-                      : "bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.09)]"
-                  )}
+                  className="group flex items-start gap-4 rounded-2xl border p-4 transition-all"
+                  style={{
+                    backgroundColor: !notif.read ? "rgba(23,122,65,0.04)" : "var(--card)",
+                    borderColor: !notif.read ? "rgba(23,122,65,0.15)" : "var(--border)",
+                  }}
                 >
-                  {/* Unread dot */}
+                  {/* Icon */}
                   <div className="relative mt-1 shrink-0">
-                    <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl", meta.bg)}>
-                      <meta.icon className={cn("h-4.5 w-4.5", meta.color)} />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl"
+                      style={{ backgroundColor: meta.bg }}>
+                      <span style={{ color: meta.color }}><meta.icon className="h-4 w-4" /></span>
                     </div>
                     {!notif.read && (
-                      <div className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#6172f3] border-2 border-[#08090e]" />
+                      <div className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2"
+                        style={{ backgroundColor: "var(--brand-500)", borderColor: "var(--card)" }} />
                     )}
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <p className={cn("text-sm font-medium", !notif.read ? "text-[#f1f3f9]" : "text-[#c4cbdc]")}>
+                      <p className="text-sm font-medium" style={{ color: notif.read ? "var(--ink-secondary)" : "var(--ink-primary)" }}>
                         {notif.title}
                       </p>
-                      <span className="text-2xs text-[#4d5675] shrink-0 mt-0.5">{formatRelativeTime(notif.createdAt)}</span>
+                      <span className="text-xs shrink-0 mt-0.5" style={{ color: "var(--ink-tertiary)" }}>{formatRelativeTime(notif.createdAt)}</span>
                     </div>
-                    <p className="text-xs text-[#8892aa] mt-0.5 leading-relaxed">{notif.body}</p>
+                    <p className="text-xs mt-0.5 leading-relaxed" style={{ color: "var(--ink-tertiary)" }}>{notif.body}</p>
                     {notif.action && (
                       <a
                         href={notif.action.href}
-                        className="mt-2 inline-flex items-center text-xs font-medium text-[#818cf8] hover:text-[#6172f3] transition-colors"
+                        className="mt-2 inline-flex items-center text-xs font-medium transition-colors"
+                        style={{ color: "var(--brand-500)" }}
                         onClick={() => markRead(notif.id)}
                       >
                         {notif.action.label} →
@@ -185,7 +188,10 @@ export default function NotificationsPage() {
                       <button
                         onClick={() => markRead(notif.id)}
                         title="Mark read"
-                        className="flex h-6 w-6 items-center justify-center rounded-md text-[#4d5675] hover:text-[#34d399] hover:bg-[rgba(16,185,129,0.08)] transition-all"
+                        className="flex h-6 w-6 items-center justify-center rounded-md transition-all"
+                        style={{ color: "var(--ink-tertiary)" }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = "var(--success)"; e.currentTarget.style.backgroundColor = "rgba(22,101,52,0.08)"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = "var(--ink-tertiary)"; e.currentTarget.style.backgroundColor = ""; }}
                       >
                         <Check className="h-3.5 w-3.5" />
                       </button>
@@ -193,7 +199,10 @@ export default function NotificationsPage() {
                     <button
                       onClick={() => deleteNotification(notif.id)}
                       title="Delete"
-                      className="flex h-6 w-6 items-center justify-center rounded-md text-[#4d5675] hover:text-[#f87171] hover:bg-[rgba(239,68,68,0.08)] transition-all"
+                      className="flex h-6 w-6 items-center justify-center rounded-md transition-all"
+                      style={{ color: "var(--ink-tertiary)" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = "var(--danger)"; e.currentTarget.style.backgroundColor = "rgba(155,28,28,0.08)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = "var(--ink-tertiary)"; e.currentTarget.style.backgroundColor = ""; }}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -209,7 +218,10 @@ export default function NotificationsPage() {
         <div className="flex justify-center">
           <button
             onClick={clearAll}
-            className="text-xs text-[#4d5675] hover:text-[#f87171] transition-colors"
+            className="text-xs transition-colors"
+            style={{ color: "var(--ink-tertiary)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--danger)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--ink-tertiary)"; }}
           >
             Clear all notifications
           </button>

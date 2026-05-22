@@ -119,18 +119,25 @@ function AccountCard({ account, onRefresh, onDisconnect }: {
                   initial={{ opacity: 0, scale: 0.97, y: -4 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.97, y: -4 }}
-                  className="absolute right-0 top-8 z-20 w-40 rounded-xl border border-[rgba(255,255,255,0.08)] bg-[#111420] shadow-[0_16px_40px_rgba(0,0,0,0.7)] overflow-hidden"
+                  className="absolute right-0 top-8 z-20 w-40 rounded-xl overflow-hidden shadow-lg"
+                  style={{ backgroundColor: "var(--card)", border: "1px solid var(--border-strong)" }}
                 >
                   <div className="p-1 space-y-0.5">
-                    <button onClick={() => { handleRefresh(); setMenuOpen(false); }} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs text-[#8892aa] hover:bg-[rgba(255,255,255,0.05)] hover:text-[#f1f3f9] transition-colors">
+                    <button onClick={() => { handleRefresh(); setMenuOpen(false); }} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-colors"
+                      style={{ color: "var(--ink-secondary)" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--surface-50)"; e.currentTarget.style.color = "var(--ink-primary)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; e.currentTarget.style.color = "var(--ink-secondary)"; }}>
                       <RefreshCw className="h-3.5 w-3.5" />
                       Refresh token
                     </button>
-                    <button className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs text-[#8892aa] hover:bg-[rgba(255,255,255,0.05)] hover:text-[#f1f3f9] transition-colors">
+                    <button className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-colors"
+                      style={{ color: "var(--ink-secondary)" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--surface-50)"; e.currentTarget.style.color = "var(--ink-primary)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; e.currentTarget.style.color = "var(--ink-secondary)"; }}>
                       <ExternalLink className="h-3.5 w-3.5" />
                       View profile
                     </button>
-                    <div className="my-1 h-px bg-[rgba(255,255,255,0.06)]" />
+                    <div className="my-1 h-px" style={{ backgroundColor: "var(--border)" }} />
                     <button
                       onClick={() => { onDisconnect(account.id); setMenuOpen(false); }}
                       className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs text-[#f87171] hover:bg-[rgba(239,68,68,0.08)] transition-colors"
@@ -210,10 +217,10 @@ export default function AccountsPage() {
           </div>
           {/* Slot indicator */}
           <div className="flex items-center gap-2">
-            <div className="h-1.5 w-32 rounded-full bg-[rgba(255,255,255,0.06)] overflow-hidden">
-              <div className="h-full rounded-full bg-gradient-to-r from-[#6172f3] to-[#a855f7]" style={{ width: `${(accounts.length / 10) * 100}%` }} />
+            <div className="h-1.5 w-32 rounded-full overflow-hidden" style={{ backgroundColor: "var(--border)" }}>
+              <div className="h-full rounded-full" style={{ width: `${(accounts.length / 10) * 100}%`, background: "linear-gradient(90deg, var(--brand-500), var(--brand-600))" }} />
             </div>
-            <span className="text-xs text-[#4d5675]">{accounts.length}/10</span>
+            <span className="text-xs" style={{ color: "var(--ink-tertiary)" }}>{accounts.length}/10</span>
           </div>
         </div>
 
@@ -251,12 +258,13 @@ export default function AccountsPage() {
               key={platform}
               disabled={!available || connecting === platform}
               onClick={() => handleConnect(platform)}
-              className={cn(
-                "flex items-center gap-3.5 rounded-2xl border p-4 text-left transition-all duration-150",
-                available
-                  ? "border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.02)] hover:border-[rgba(97,114,243,0.3)] hover:bg-[rgba(97,114,243,0.05)] cursor-pointer"
-                  : "border-[rgba(255,255,255,0.04)] bg-[rgba(255,255,255,0.01)] cursor-not-allowed opacity-50"
-              )}
+              className="flex items-center gap-3.5 rounded-2xl border p-4 text-left transition-all duration-150 cursor-pointer"
+              style={{
+                borderColor: available ? "var(--border)" : "var(--border-subtle)",
+                backgroundColor: available ? "var(--card)" : "var(--surface-50)",
+                opacity: available ? 1 : 0.5,
+                cursor: available ? "pointer" : "not-allowed",
+              }}
             >
               <PlatformIcon platform={platform} size={18} showBg />
               <div className="flex-1 min-w-0">
@@ -276,11 +284,11 @@ export default function AccountsPage() {
       </section>
 
       {/* Permissions note */}
-      <div className="flex items-start gap-3 rounded-2xl border border-[rgba(97,114,243,0.15)] bg-[rgba(97,114,243,0.06)] p-4">
-        <Shield className="h-4 w-4 text-[#818cf8] mt-0.5 shrink-0" />
+      <div className="flex items-start gap-3 rounded-2xl p-4" style={{ border: "1px solid rgba(23,122,65,0.2)", backgroundColor: "rgba(23,122,65,0.05)" }}>
+        <Shield className="h-4 w-4 mt-0.5 shrink-0" style={{ color: "var(--brand-500)" }} />
         <div>
-          <p className="text-xs font-semibold text-[#818cf8]">Data security</p>
-          <p className="text-xs text-[#4d5675] mt-0.5 leading-relaxed">
+          <p className="text-xs font-semibold" style={{ color: "var(--brand-500)" }}>Data security</p>
+          <p className="text-xs mt-0.5 leading-relaxed" style={{ color: "var(--ink-tertiary)" }}>
             We only request the minimum permissions needed to post on your behalf.
             Access tokens are encrypted at rest. You can revoke access at any time.
           </p>

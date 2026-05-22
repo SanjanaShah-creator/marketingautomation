@@ -13,7 +13,7 @@ const badgeVariants = cva(
         danger:    "badge-danger",
         info:      "badge-info",
         neutral:   "badge-neutral",
-        outline:   "border border-[rgba(255,255,255,0.12)] text-[#8892aa]",
+        outline:   "border border-[var(--border-strong)] text-[var(--ink-secondary)]",
       },
     },
     defaultVariants: { variant: "default" },
@@ -36,8 +36,8 @@ function Badge({ className, variant, dot, children, ...props }: BadgeProps) {
             "bg-[#fbbf24]": variant === "warning",
             "bg-[#f87171]": variant === "danger",
             "bg-[#60a5fa]": variant === "info",
-            "bg-[#818cf8]": variant === "default" || !variant,
-            "bg-[#8892aa]": variant === "neutral",
+            "bg-[#177A41]": variant === "default" || !variant,
+            "bg-[#476B52]": variant === "neutral",
           })}
         />
       )}

@@ -8,13 +8,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#08090e]">
-      {/* Background ambient glow */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-1/4 left-1/4 h-[600px] w-[600px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(97,114,243,0.05)_0%,transparent_70%)]" />
-        <div className="absolute top-1/2 right-0 h-[400px] w-[400px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(168,85,247,0.04)_0%,transparent_70%)]" />
-      </div>
-
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "var(--surface-0)" }}>
       {/* Sidebar */}
       <Sidebar collapsed={collapsed} onCollapse={setCollapsed} />
 

@@ -3,17 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Zap, ArrowRight, Check } from "lucide-react";
+import { Eye, EyeOff, Zap, ArrowRight, Check, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-function GithubIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
-    </svg>
-  );
-}
 
 function GoogleIcon({ className }: { className?: string }) {
   return (
@@ -26,17 +18,29 @@ function GoogleIcon({ className }: { className?: string }) {
   );
 }
 
+const COUNTRY_CODES = [
+  { code: "+1", flag: "🇺🇸", label: "US" },
+  { code: "+44", flag: "🇬🇧", label: "UK" },
+  { code: "+91", flag: "🇮🇳", label: "IN" },
+  { code: "+61", flag: "🇦🇺", label: "AU" },
+  { code: "+49", flag: "🇩🇪", label: "DE" },
+  { code: "+33", flag: "🇫🇷", label: "FR" },
+  { code: "+81", flag: "🇯🇵", label: "JP" },
+  { code: "+65", flag: "🇸🇬", label: "SG" },
+];
+
 const passwordRequirements = [
   { label: "At least 8 characters", test: (p: string) => p.length >= 8 },
-  { label: "One uppercase letter", test: (p: string) => /[A-Z]/.test(p) },
-  { label: "One number", test: (p: string) => /\d/.test(p) },
+  { label: "One uppercase letter",  test: (p: string) => /[A-Z]/.test(p) },
+  { label: "One number",            test: (p: string) => /\d/.test(p) },
 ];
 
 export default function SignupPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", password: "", workspace: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", workspace: "", phone: "" });
+  const [countryCode, setCountryCode] = useState("+1");
 
   const metRequirements = passwordRequirements.filter((r) => r.test(form.password));
   const passwordStrength = metRequirements.length;
@@ -52,19 +56,21 @@ export default function SignupPage() {
     <div className="animate-fade-up">
       {/* Logo */}
       <div className="mb-8 flex flex-col items-center gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6172f3] to-[#a855f7] shadow-[0_0_24px_rgba(97,114,243,0.5)]">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl"
+          style={{ background: "linear-gradient(135deg, var(--brand-500), var(--brand-600))", boxShadow: "0 0 24px rgba(23,122,65,0.35)" }}>
           <Zap className="h-6 w-6 text-white" strokeWidth={2.5} />
         </div>
         <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-[#f1f3f9]">Create your account</h1>
-          <p className="mt-1 text-sm text-[#8892aa]">Start your 14-day free trial. No credit card required.</p>
+          <h1 className="text-2xl font-bold tracking-tight" style={{ color: "var(--ink-primary)" }}>Create your account</h1>
+          <p className="mt-1 text-sm" style={{ color: "var(--ink-tertiary)" }}>Start your 14-day free trial. No credit card required.</p>
         </div>
       </div>
 
       {/* Feature pills */}
       <div className="mb-5 flex flex-wrap justify-center gap-2">
         {["AI Content Generation", "10 Social Accounts", "Unlimited Scheduling"].map((f) => (
-          <span key={f} className="flex items-center gap-1.5 rounded-full bg-[rgba(97,114,243,0.1)] px-3 py-1 text-xs font-medium text-[#818cf8] border border-[rgba(97,114,243,0.2)]">
+          <span key={f} className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
+            style={{ backgroundColor: "rgba(23,122,65,0.08)", border: "1px solid rgba(23,122,65,0.2)", color: "var(--brand-500)" }}>
             <Check className="h-3 w-3" />
             {f}
           </span>
@@ -72,21 +78,17 @@ export default function SignupPage() {
       </div>
 
       {/* Card */}
-      <div className="glass rounded-3xl p-6 shadow-[0_24px_64px_rgba(0,0,0,0.6)]">
-        {/* OAuth */}
-        <div className="mb-5 grid grid-cols-2 gap-2.5">
-          <Button variant="secondary" size="sm" className="w-full gap-2">
-            <GithubIcon className="h-4 w-4" /> GitHub
-          </Button>
-          <Button variant="secondary" size="sm" className="w-full gap-2">
-            <GoogleIcon className="h-4 w-4" /> Google
-          </Button>
-        </div>
+      <div className="rounded-3xl p-6 shadow-sm" style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}>
+        {/* Google OAuth */}
+        <Button variant="secondary" size="sm" className="w-full gap-2 mb-5">
+          <GoogleIcon className="h-4 w-4" />
+          Sign up with Google
+        </Button>
 
         <div className="relative mb-5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-[rgba(255,255,255,0.06)]" />
-          <span className="text-xs text-[#4d5675]">or sign up with email</span>
-          <div className="h-px flex-1 bg-[rgba(255,255,255,0.06)]" />
+          <div className="h-px flex-1" style={{ backgroundColor: "var(--border)" }} />
+          <span className="text-xs" style={{ color: "var(--ink-tertiary)" }}>or sign up with email</span>
+          <div className="h-px flex-1" style={{ backgroundColor: "var(--border)" }} />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3.5">
@@ -116,8 +118,49 @@ export default function SignupPage() {
             required
           />
 
+          {/* Phone number */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-[#8892aa]">Password</label>
+            <label className="text-sm font-medium" style={{ color: "var(--ink-secondary)" }}>
+              Phone number <span style={{ color: "var(--ink-tertiary)" }}>(optional)</span>
+            </label>
+            <div className="flex gap-2">
+              <select
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
+                className="h-10 rounded-[0.625rem] px-2 text-sm transition-all focus:outline-none"
+                style={{
+                  backgroundColor: "var(--surface-50)",
+                  border: "1px solid var(--border-strong)",
+                  color: "var(--ink-primary)",
+                  minWidth: 76,
+                }}
+              >
+                {COUNTRY_CODES.map((c) => (
+                  <option key={c.code} value={c.code}>{c.flag} {c.code}</option>
+                ))}
+              </select>
+              <input
+                type="tel"
+                placeholder="(555) 000-0000"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                className="flex h-10 flex-1 rounded-[0.625rem] px-3 py-2 text-sm transition-all focus:outline-none focus:ring-2"
+                style={{
+                  backgroundColor: "var(--surface-50)",
+                  border: "1px solid var(--border-strong)",
+                  color: "var(--ink-primary)",
+                }}
+              />
+            </div>
+            <p className="flex items-center gap-1 text-xs" style={{ color: "var(--ink-tertiary)" }}>
+              <Phone className="h-3 w-3" />
+              Used for two-factor authentication — never shared
+            </p>
+          </div>
+
+          {/* Password */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium" style={{ color: "var(--ink-secondary)" }}>Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -125,12 +168,18 @@ export default function SignupPage() {
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 required
-                className="flex h-9 w-full rounded-[0.625rem] bg-[rgba(255,255,255,0.04)] px-3 py-2 pr-10 text-sm text-[#f1f3f9] border border-[rgba(255,255,255,0.08)] placeholder:text-[#4d5675] transition-all duration-150 hover:border-[rgba(255,255,255,0.14)] focus:border-[rgba(97,114,243,0.6)] focus:outline-none focus:ring-[3px] focus:ring-[rgba(97,114,243,0.12)]"
+                className="flex h-10 w-full rounded-[0.625rem] px-3 py-2 pr-10 text-sm transition-all focus:outline-none focus:ring-2"
+                style={{
+                  backgroundColor: "var(--surface-50)",
+                  border: "1px solid var(--border-strong)",
+                  color: "var(--ink-primary)",
+                }}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4d5675] hover:text-[#8892aa] transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                style={{ color: "var(--ink-tertiary)" }}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -139,21 +188,18 @@ export default function SignupPage() {
               <div className="space-y-2">
                 <div className="flex gap-1">
                   {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                        i <= passwordStrength
-                          ? passwordStrength === 1 ? "bg-[#ef4444]" : passwordStrength === 2 ? "bg-[#f59e0b]" : "bg-[#10b981]"
-                          : "bg-[rgba(255,255,255,0.08)]"
-                      }`}
-                    />
+                    <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                      i <= passwordStrength
+                        ? passwordStrength === 1 ? "bg-[#ef4444]" : passwordStrength === 2 ? "bg-[#f59e0b]" : "bg-[#10b981]"
+                        : "bg-[rgba(0,0,0,0.1)]"
+                    }`} />
                   ))}
                 </div>
                 <div className="space-y-1">
                   {passwordRequirements.map((req) => (
                     <div key={req.label} className="flex items-center gap-1.5">
-                      <div className={`h-1.5 w-1.5 rounded-full transition-colors ${req.test(form.password) ? "bg-[#10b981]" : "bg-[rgba(255,255,255,0.15)]"}`} />
-                      <span className={`text-2xs transition-colors ${req.test(form.password) ? "text-[#6ee7b7]" : "text-[#4d5675]"}`}>{req.label}</span>
+                      <div className={`h-1.5 w-1.5 rounded-full transition-colors ${req.test(form.password) ? "bg-[#10b981]" : "bg-[rgba(0,0,0,0.15)]"}`} />
+                      <span className="text-xs transition-colors" style={{ color: req.test(form.password) ? "var(--success)" : "var(--ink-tertiary)" }}>{req.label}</span>
                     </div>
                   ))}
                 </div>
@@ -171,18 +217,18 @@ export default function SignupPage() {
             Create account
           </Button>
 
-          <p className="text-center text-2xs text-[#4d5675]">
+          <p className="text-center text-xs" style={{ color: "var(--ink-tertiary)" }}>
             By creating an account, you agree to our{" "}
-            <Link href="/terms" className="text-[#818cf8] hover:underline">Terms</Link>{" "}
+            <Link href="/terms" className="font-medium" style={{ color: "var(--brand-500)" }}>Terms</Link>{" "}
             and{" "}
-            <Link href="/privacy" className="text-[#818cf8] hover:underline">Privacy Policy</Link>.
+            <Link href="/privacy" className="font-medium" style={{ color: "var(--brand-500)" }}>Privacy Policy</Link>.
           </p>
         </form>
       </div>
 
-      <p className="mt-5 text-center text-sm text-[#4d5675]">
+      <p className="mt-5 text-center text-sm" style={{ color: "var(--ink-tertiary)" }}>
         Already have an account?{" "}
-        <Link href="/login" className="text-[#818cf8] hover:text-[#6172f3] font-medium transition-colors">
+        <Link href="/login" className="font-medium transition-colors" style={{ color: "var(--brand-500)" }}>
           Sign in
         </Link>
       </p>
