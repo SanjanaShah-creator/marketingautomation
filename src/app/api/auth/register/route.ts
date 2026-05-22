@@ -12,11 +12,6 @@ const registerSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  if (!process.env.DATABASE_URL) {
-    console.error("[Register] DATABASE_URL not configured");
-    return NextResponse.json({ error: "Server configuration error. Please contact support." }, { status: 503 });
-  }
-
   try {
     const body = await req.json();
     const parsed = registerSchema.safeParse(body);
@@ -43,26 +38,25 @@ export async function POST(req: NextRequest) {
       slug = `${baseSlug}-${suffix}`;
     }
 
-    await prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: { name, email, passwordHash },
-      });
-      const workspace = await tx.workspace.create({
-        data: { name: wsName, slug },
-      });
-      await tx.workspaceMember.create({
-        data: { userId: user.id, workspaceId: workspace.id, role: "OWNER" },
-      });
+    // Use nested create — $transaction is not supported with the pg adapter
+    await prisma.user.create({
+      data: {
+        name,
+        email,
+        passwordHash,
+        workspaceMembers: {
+          create: {
+            role: "OWNER",
+            workspace: { create: { name: wsName, slug } },
+          },
+        },
+      },
     });
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("[Register] error:", msg);
-    // surface DB-related errors clearly
-    if (msg.includes("connect") || msg.includes("ENOTFOUND") || msg.includes("timeout")) {
-      return NextResponse.json({ error: "Could not connect to database. Please try again." }, { status: 503 });
-    }
     return NextResponse.json({ error: "Registration failed. Please try again." }, { status: 500 });
   }
 }
