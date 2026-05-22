@@ -2,33 +2,40 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { exchangeCodeForToken, getLongLivedToken, getInstagramProfile } from "@/lib/instagram";
 
-const ACCOUNTS_URL = `${process.env.NEXTAUTH_URL}/accounts`;
+function appUrl(req: NextRequest) {
+  return (
+    process.env.NEXTAUTH_URL ??
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `${req.nextUrl.protocol}//${req.nextUrl.host}`)
+  );
+}
 
 export async function GET(req: NextRequest) {
+  const base = appUrl(req);
   const { searchParams } = new URL(req.url);
-  const code = searchParams.get("code");
+  const code       = searchParams.get("code");
   const stateParam = searchParams.get("state");
-  const error = searchParams.get("error");
+  const error      = searchParams.get("error");
 
   if (error || !code || !stateParam) {
-    return NextResponse.redirect(`${ACCOUNTS_URL}?error=instagram_denied`);
+    return NextResponse.redirect(`${base}/accounts?error=instagram_denied`);
   }
 
-  // Verify state matches cookie (CSRF protection)
+  // CSRF — verify state matches cookie
   const cookieState = req.cookies.get("ig_oauth_state")?.value;
   if (!cookieState || cookieState !== stateParam) {
-    return NextResponse.redirect(`${ACCOUNTS_URL}?error=invalid_state`);
+    return NextResponse.redirect(`${base}/accounts?error=invalid_state`);
   }
 
   let workspaceId: string;
+  let returnTo = "";
   try {
-    ({ workspaceId } = JSON.parse(Buffer.from(stateParam, "base64url").toString("utf-8")));
+    ({ workspaceId, returnTo = "" } = JSON.parse(Buffer.from(stateParam, "base64url").toString("utf-8")));
   } catch {
-    return NextResponse.redirect(`${ACCOUNTS_URL}?error=invalid_state`);
+    return NextResponse.redirect(`${base}/accounts?error=invalid_state`);
   }
 
   try {
-    const redirectUri = `${process.env.NEXTAUTH_URL}/api/auth/instagram/callback`;
+    const redirectUri = `${base}/api/auth/instagram/callback`;
 
     const { access_token: shortToken } = await exchangeCodeForToken(code, redirectUri);
     const { access_token: longToken, expires_in } = await getLongLivedToken(shortToken);
@@ -63,11 +70,14 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    const res = NextResponse.redirect(`${ACCOUNTS_URL}?connected=instagram`);
+    const redirectPath = returnTo === "onboarding"
+      ? `${base}/onboarding?connected=instagram`
+      : `${base}/accounts?connected=instagram`;
+    const res = NextResponse.redirect(redirectPath);
     res.cookies.delete("ig_oauth_state");
     return res;
   } catch (e) {
     console.error("[Instagram OAuth] callback error:", e);
-    return NextResponse.redirect(`${ACCOUNTS_URL}?error=instagram_failed`);
+    return NextResponse.redirect(`${base}/accounts?error=instagram_failed`);
   }
 }

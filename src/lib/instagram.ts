@@ -50,10 +50,10 @@ export async function getInstagramProfile(accessToken: string) {
   }>;
 }
 
-export function buildOAuthUrl(state: string) {
+export function buildOAuthUrl(state: string, redirectUri: string) {
   const params = new URLSearchParams({
     client_id: process.env.INSTAGRAM_CLIENT_ID!,
-    redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/instagram/callback`,
+    redirect_uri: redirectUri,
     scope: "instagram_business_basic",
     response_type: "code",
     state,

@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Zap, ArrowRight, Check, Phone } from "lucide-react";
+import { Eye, EyeOff, Zap, ArrowRight, Check, Phone, AlertCircle } from "lucide-react";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -39,8 +40,10 @@ export default function SignupPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "", workspace: "", phone: "" });
   const [countryCode, setCountryCode] = useState("+1");
+  const [error, setError] = useState("");
 
   const metRequirements = passwordRequirements.filter((r) => r.test(form.password));
   const passwordStrength = metRequirements.length;
@@ -48,8 +51,45 @@ export default function SignupPage() {
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1400));
-    router.push("/onboarding");
+    setError("");
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          password: form.password,
+          workspaceName: form.workspace || form.name,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Registration failed. Please try again.");
+        return;
+      }
+      const result = await signIn("credentials", {
+        email: form.email,
+        password: form.password,
+        redirect: false,
+      });
+      if (result?.error) {
+        setError("Account created but sign-in failed. Please log in.");
+        router.push("/login");
+      } else {
+        router.push("/onboarding");
+        router.refresh();
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    setGoogleLoading(true);
+    await signIn("google", { callbackUrl: "/onboarding" });
   }
 
   return (
@@ -80,7 +120,8 @@ export default function SignupPage() {
       {/* Card */}
       <div className="rounded-3xl p-6 shadow-sm" style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}>
         {/* Google OAuth */}
-        <Button variant="secondary" size="sm" className="w-full gap-2 mb-5">
+        <Button variant="secondary" size="sm" className="w-full gap-2 mb-5"
+          onClick={handleGoogleSignIn} loading={googleLoading} type="button">
           <GoogleIcon className="h-4 w-4" />
           Sign up with Google
         </Button>
@@ -206,6 +247,14 @@ export default function SignupPage() {
               </div>
             )}
           </div>
+
+          {error && (
+            <div className="flex items-center gap-2 rounded-xl px-3 py-2.5"
+              style={{ backgroundColor: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
+              <AlertCircle className="h-4 w-4 shrink-0" style={{ color: "#ef4444" }} />
+              <span className="text-sm" style={{ color: "#ef4444" }}>{error}</span>
+            </div>
+          )}
 
           <Button
             type="submit"

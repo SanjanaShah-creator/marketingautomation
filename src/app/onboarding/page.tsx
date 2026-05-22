@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Zap, ArrowRight, Users, BarChart2, Clock, CheckCircle2, ChevronRight, X, Plus,
@@ -48,6 +48,16 @@ interface BrandData {
   brandColors: string[]; brandKeywords: string[]; brandVoice: string;
 }
 
+function OAuthResultWatcher({ onConnected }: { onConnected: (platform: string) => void }) {
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const connected = searchParams.get("connected");
+    if (connected) onConnected(connected.toUpperCase());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return null;
+}
+
 export default function OnboardingPage() {
   const router  = useRouter();
   const [step, setStep] = useState<Step>("welcome");
@@ -59,19 +69,38 @@ export default function OnboardingPage() {
   const [brandLoading, setBrandLoading]           = useState(false);
   const [brandError, setBrandError]               = useState("");
   const [brandData, setBrandData]                 = useState<BrandData | null>(null);
+  const [toast, setToast]                         = useState("");
 
   const stepIndex = STEPS.indexOf(step);
   const progress  = (stepIndex / (STEPS.length - 1)) * 100;
+
+  // Pre-populate connected accounts on mount
+  useEffect(() => {
+    fetch("/api/accounts")
+      .then((r) => r.ok ? r.json() : [])
+      .then((accounts: { platform: string }[]) => {
+        if (accounts.length > 0) {
+          setSelectedPlatforms(accounts.map((a) => a.platform));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  function showToast(msg: string) {
+    setToast(msg);
+    setTimeout(() => setToast(""), 3000);
+  }
 
   function togglePlatform(id: string) {
     setSelectedPlatforms((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]);
   }
 
-  async function handleConnectPlatform(id: string) {
-    setConnecting(id);
-    await new Promise((r) => setTimeout(r, 1200));
-    setConnecting(null);
-    togglePlatform(id);
+  function handleConnectPlatform(id: string) {
+    if (id === "INSTAGRAM") {
+      window.location.href = "/api/auth/instagram?returnTo=onboarding";
+    } else {
+      showToast(`${id.charAt(0) + id.slice(1).toLowerCase()} coming soon`);
+    }
   }
 
   async function analyzeBrand() {
@@ -109,6 +138,27 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--surface-0)" }}>
+
+      {/* OAuth return param watcher */}
+      <Suspense fallback={null}>
+        <OAuthResultWatcher onConnected={(platform) => {
+          setSelectedPlatforms((p) => p.includes(platform) ? p : [...p, platform]);
+          setStep("platforms");
+          showToast(`${platform.charAt(0) + platform.slice(1).toLowerCase()} connected!`);
+        }} />
+      </Suspense>
+
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }}
+            className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl px-5 py-3 text-sm font-medium shadow-lg"
+            style={{ backgroundColor: "var(--ink-primary)", color: "var(--surface-0)" }}>
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Top progress bar ─────────────────────────────────── */}
       <div className="fixed top-0 left-0 right-0 z-50 h-0.5" style={{ backgroundColor: "var(--border-subtle)" }}>

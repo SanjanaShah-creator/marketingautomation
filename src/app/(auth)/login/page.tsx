@@ -3,7 +3,8 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Zap, ArrowRight, X, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Zap, ArrowRight, X, ShieldCheck, AlertCircle } from "lucide-react";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
@@ -62,7 +63,9 @@ export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
   const [show2Fa, setShow2Fa] = useState(false);
   const [twoFaCode, setTwoFaCode] = useState(["", "", "", "", "", ""]);
   const [verifying2Fa, setVerifying2Fa] = useState(false);
@@ -70,13 +73,29 @@ export default function LoginPage() {
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
-    if (form.email.includes("2fa")) {
-      setShow2Fa(true);
-    } else {
-      router.push("/dashboard");
+    setError("");
+    try {
+      const result = await signIn("credentials", {
+        email: form.email,
+        password: form.password,
+        redirect: false,
+      });
+      if (result?.error) {
+        setError("Invalid email or password. Please try again.");
+      } else {
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
+  }
+
+  async function handleGoogleSignIn() {
+    setGoogleLoading(true);
+    await signIn("google", { callbackUrl: "/dashboard" });
   }
 
   async function handleVerify2Fa() {
@@ -103,7 +122,8 @@ export default function LoginPage() {
       {/* Card */}
       <div className="rounded-3xl p-6 shadow-sm" style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}>
         {/* Google OAuth */}
-        <Button variant="secondary" size="sm" className="w-full gap-2 mb-5">
+        <Button variant="secondary" size="sm" className="w-full gap-2 mb-5"
+          onClick={handleGoogleSignIn} loading={googleLoading} type="button">
           <GoogleIcon className="h-4 w-4" />
           Continue with Google
         </Button>
@@ -160,6 +180,14 @@ export default function LoginPage() {
               </button>
             </div>
           </div>
+
+          {error && (
+            <div className="flex items-center gap-2 rounded-xl px-3 py-2.5"
+              style={{ backgroundColor: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
+              <AlertCircle className="h-4 w-4 shrink-0" style={{ color: "#ef4444" }} />
+              <span className="text-sm" style={{ color: "#ef4444" }}>{error}</span>
+            </div>
+          )}
 
           <Button
             type="submit"
