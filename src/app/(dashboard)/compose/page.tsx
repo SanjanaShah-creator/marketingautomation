@@ -18,7 +18,6 @@ import type { SocialPlatform } from "@/types";
 // ── Constants ──────────────────────────────────────────────────────────────
 
 const PLATFORMS: { key: SocialPlatform; label: string; handle: string }[] = [
-  { key: "TWITTER",   label: "Twitter",   handle: "@socialsync" },
   { key: "INSTAGRAM", label: "Instagram", handle: "@socialsync.app" },
   { key: "LINKEDIN",  label: "LinkedIn",  handle: "SocialSync" },
   { key: "FACEBOOK",  label: "Facebook",  handle: "SocialSync" },
@@ -32,11 +31,7 @@ type ImgStyle = typeof IMG_STYLES[number];
 interface Suggestion { id: string; content: string; tags: string[] }
 
 const BRAND_SUGGESTIONS: Record<SocialPlatform, Suggestion[]> = {
-  TWITTER: [
-    { id: "tw1", content: "🚀 AI content generation just got smarter.\n\nMost teams spend 6+ hrs/week writing social posts. We turned that into 6 minutes.\n\nTry SocialSync free → socialsync.app\n\n#AI #Marketing #SaaS", tags: ["#AI", "#Marketing", "#SaaS"] },
-    { id: "tw2", content: "Hot take: Your brand voice matters more than your posting frequency.\n\nConsistency in tone builds trust. Trust drives conversions.\n\nWhat's your brand voice? Reply below 👇\n\n#BrandVoice #ContentMarketing", tags: ["#BrandVoice", "#ContentMarketing"] },
-    { id: "tw3", content: "We analyzed 10,000 social posts to find what actually works.\n\nTop finding: Posts with a clear CTA get 3.2× more engagement.\n\nFull breakdown in the thread 🧵\n\n#DataDriven #SocialMedia #GrowthHacking", tags: ["#DataDriven", "#GrowthHacking"] },
-  ],
+  TWITTER: [],
   INSTAGRAM: [
     { id: "ig1", content: "Behind every great post is a great strategy ✨\n\nWe've been quietly building something that helps brands show up consistently — without burning out their teams.\n\nSpoiler: it's already changing how 50,000+ brands create content.\n\nLink in bio to see what's possible 🔗\n\n#ContentCreation #MarketingTips #SocialMediaMarketing #BrandBuilding #DigitalMarketing", tags: ["#ContentCreation", "#MarketingTips"] },
     { id: "ig2", content: "This is what your content calendar looks like with AI 🤯\n\nWeek 1: Done ✅\nWeek 2: Done ✅\nWeek 3: Done ✅\nWeek 4: Done ✅\n\nStop creating content one post at a time. Start building a content engine.\n\nSave this and share it with someone who needs this 💚\n\n#AIMarketing #ContentStrategy #SocialMediaTips", tags: ["#AIMarketing", "#ContentStrategy"] },
@@ -108,7 +103,7 @@ export default function ComposePage() {
   const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const [activePlatform, setActivePlatform] = useState<SocialPlatform>("TWITTER");
+  const [activePlatform, setActivePlatform] = useState<SocialPlatform>("INSTAGRAM");
   const [content, setContent] = useState("");
   const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);

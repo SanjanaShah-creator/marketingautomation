@@ -33,7 +33,7 @@ const engagementData = [
 const scheduledPosts = [
   {
     id: "1", content: "Excited to share our latest feature drop! 🚀 The AI content engine is now 3x faster with smarter suggestions.",
-    platforms: ["TWITTER", "LINKEDIN"] as SocialPlatform[],
+    platforms: ["INSTAGRAM", "LINKEDIN"] as SocialPlatform[],
     scheduledAt: new Date(Date.now() + 2 * 3600000), status: "SCHEDULED", mediaCount: 0,
   },
   {
@@ -42,8 +42,8 @@ const scheduledPosts = [
     scheduledAt: new Date(Date.now() + 5 * 3600000), status: "SCHEDULED", mediaCount: 3,
   },
   {
-    id: "3", content: "Join us for our weekly Twitter Space on AI & Marketing this Friday at 3pm ET.",
-    platforms: ["TWITTER"] as SocialPlatform[],
+    id: "3", content: "Join us for our live session on AI & Marketing this Friday at 3pm ET.",
+    platforms: ["INSTAGRAM", "LINKEDIN"] as SocialPlatform[],
     scheduledAt: new Date(Date.now() + 26 * 3600000), status: "DRAFT", mediaCount: 0,
   },
 ];
@@ -52,19 +52,19 @@ const recentActivity = [
   { icon: CheckCircle2, color: "var(--success)", text: "Instagram post published — 1.2K impressions",  time: new Date(Date.now() - 30 * 60000) },
   { icon: Sparkles,    color: "var(--brand-500)", text: "AI generated 5 caption variations",           time: new Date(Date.now() - 2 * 3600000) },
   { icon: Users,       color: "var(--info)",      text: "Sarah joined your workspace",                  time: new Date(Date.now() - 4 * 3600000) },
-  { icon: AlertCircle, color: "var(--danger)",    text: "Twitter post failed — reconnect account",      time: new Date(Date.now() - 6 * 3600000) },
+  { icon: AlertCircle, color: "var(--danger)",    text: "Instagram post failed — reconnect account",    time: new Date(Date.now() - 6 * 3600000) },
 ];
 
 const connectedAccounts = [
-  { platform: "TWITTER"   as SocialPlatform, handle: "@socialsync",     followers: 4821  },
   { platform: "INSTAGRAM" as SocialPlatform, handle: "@socialsync.app", followers: 12300 },
   { platform: "LINKEDIN"  as SocialPlatform, handle: "SocialSync",       followers: 2940  },
+  { platform: "FACEBOOK"  as SocialPlatform, handle: "SocialSync",       followers: 5100  },
 ];
 
 const contentIdeas = [
-  { id: "1", platform: "TWITTER"   as SocialPlatform, label: "Twitter",   color: "#1da1f2", tag: "Thought leadership", idea: "Share a data-backed insight about AI in marketing — your audience loves stats. Keep it under 280 chars with a hook first." },
-  { id: "2", platform: "INSTAGRAM" as SocialPlatform, label: "Instagram", color: "#e1306c", tag: "Behind the scenes",   idea: "Post a behind-the-scenes look at how your team works. Authentic content is outperforming polished ads by 3× right now." },
-  { id: "3", platform: "LINKEDIN"  as SocialPlatform, label: "LinkedIn",  color: "#0a66c2", tag: "Brand story",         idea: "Write a short lesson from a recent challenge your brand overcame. Vulnerable + educational posts get the highest saves." },
+  { id: "1", platform: "INSTAGRAM" as SocialPlatform, label: "Instagram", color: "#e1306c", tag: "Reels idea",          idea: "Create a short Reel showing before/after results. Reels get 3× more reach than static posts right now." },
+  { id: "2", platform: "LINKEDIN"  as SocialPlatform, label: "LinkedIn",  color: "#0a66c2", tag: "Thought leadership",  idea: "Share a data-backed insight about AI in marketing — your audience loves stats with a strong opening hook." },
+  { id: "3", platform: "INSTAGRAM" as SocialPlatform, label: "Instagram", color: "#e1306c", tag: "Behind the scenes",   idea: "Post a behind-the-scenes look at how your team works. Authentic content is outperforming polished ads by 3×." },
 ];
 
 // ── Chart tooltip ─────────────────────────────────────────────────────────

@@ -1,14 +1,13 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Trash2, RefreshCw, ExternalLink, AlertCircle,
-  CheckCircle2, XCircle, Link2, Shield, MoreHorizontal, Loader2,
+  CheckCircle2, XCircle, Link2, Shield, MoreHorizontal, Loader2, Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { PlatformIcon } from "@/components/shared/platform-icon";
 import { formatNumber, formatRelativeTime } from "@/lib/utils";
 import type { SocialPlatform } from "@/types";
@@ -29,8 +28,9 @@ interface ConnectedAccount {
   tokenExpiresAt?: string | null;
 }
 
-const AVAILABLE_PLATFORMS: { platform: SocialPlatform; desc: string }[] = [
+const AVAILABLE_PLATFORMS: { platform: SocialPlatform; desc: string; connectHref?: string }[] = [
   { platform: "FACEBOOK",  desc: "Pages & personal profiles" },
+  { platform: "LINKEDIN",  desc: "Professional content" },
   { platform: "TIKTOK",    desc: "Short-form video content" },
   { platform: "YOUTUBE",   desc: "Long-form video & shorts" },
   { platform: "THREADS",   desc: "Microblogging by Meta" },
@@ -295,6 +295,15 @@ export default function AccountsPage() {
   }
 
   const hasInstagram = accounts.some((a) => a.platform === "INSTAGRAM");
+  const [, startTransition] = useTransition();
+  const [comingSoonPlatform, setComingSoonPlatform] = useState<string | null>(null);
+
+  function showComingSoon(platform: string) {
+    setComingSoonPlatform(platform);
+    startTransition(() => {
+      setTimeout(() => setComingSoonPlatform(null), 3000);
+    });
+  }
 
   return (
     <div className="max-w-4xl space-y-8">
@@ -428,30 +437,47 @@ export default function AccountsPage() {
         </section>
       )}
 
-      {/* ── More platforms (coming soon) ── */}
+      {/* ── More platforms ── */}
       <section>
         <h2 className="text-base font-semibold mb-1" style={{ color: "var(--ink-primary)" }}>
           Add more platforms
         </h2>
         <p className="text-xs mb-4" style={{ color: "var(--ink-secondary)" }}>
-          More integrations coming soon
+          Connect additional social accounts to expand your reach
         </p>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {AVAILABLE_PLATFORMS.map(({ platform, desc }) => (
-            <div
+
+        {/* Coming-soon inline toast */}
+        <AnimatePresence>
+          {comingSoonPlatform && (
+            <motion.div
+              initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
+              className="mb-3 flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-medium"
+              style={{ backgroundColor: "rgba(23,122,65,0.08)", border: "1px solid rgba(23,122,65,0.2)", color: "var(--brand-600)" }}
+            >
+              {comingSoonPlatform} integration is being built — check back soon!
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {AVAILABLE_PLATFORMS.filter((p) => !accounts.find((a) => a.platform === p.platform)).map(({ platform, desc, connectHref }) => (
+            <button
               key={platform}
-              className="flex items-center gap-3 rounded-xl border p-3.5"
-              style={{ borderColor: "var(--border)", backgroundColor: "var(--surface-50)" }}
+              onClick={() => connectHref ? window.location.href = connectHref : showComingSoon(platform.charAt(0) + platform.slice(1).toLowerCase())}
+              className="flex items-center gap-3 rounded-xl border p-3.5 text-left transition-all group"
+              style={{ borderColor: "var(--border)", backgroundColor: "var(--card)", cursor: "pointer" }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(23,122,65,0.3)"; e.currentTarget.style.backgroundColor = "rgba(23,122,65,0.03)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.backgroundColor = "var(--card)"; }}
             >
               <PlatformIcon platform={platform} size={16} showBg />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium" style={{ color: "var(--ink-secondary)" }}>
+                <p className="text-sm font-medium" style={{ color: "var(--ink-primary)" }}>
                   {platform.charAt(0) + platform.slice(1).toLowerCase()}
                 </p>
                 <p className="text-2xs truncate" style={{ color: "var(--ink-tertiary)" }}>{desc}</p>
               </div>
-              <Badge variant="neutral" className="text-2xs shrink-0">Soon</Badge>
-            </div>
+              <Plus className="h-4 w-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "var(--brand-500)" }} />
+            </button>
           ))}
         </div>
       </section>

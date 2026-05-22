@@ -8,6 +8,7 @@ const generateSchema = z.object({
   prompt: z.string().min(1).max(2000),
   tone: z.enum(["professional", "casual", "humorous", "inspiring", "educational", "bold"]).default("professional"),
   platforms: z.array(z.string()).default(["INSTAGRAM"]),
+  // TWITTER intentionally excluded — not a supported platform
   variations: z.number().min(1).max(5).default(3),
   workspaceId: z.string().cuid(),
 });

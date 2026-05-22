@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Eye, Heart, Users, TrendingUp, ArrowUpRight, ArrowDownRight,
-  BarChart2, Zap, ExternalLink,
+  BarChart2, Zap, ExternalLink, Link2,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer,
@@ -49,17 +50,17 @@ const STAT_DELTAS: Record<Range, { reach: number; engagements: number; followers
 };
 
 const PLATFORM_STATS: { name: string; platform: SocialPlatform; reach: number; engagements: number; followers: number; posts: number; color: string; engRate: number }[] = [
-  { name: "Twitter",   platform: "TWITTER",   reach: 18200, engagements: 1640, followers: 4821,  posts: 24, color: "#1da1f2", engRate: 4.2 },
   { name: "Instagram", platform: "INSTAGRAM", reach: 12400, engagements: 2100, followers: 12300, posts: 18, color: "#e1306c", engRate: 6.8 },
   { name: "LinkedIn",  platform: "LINKEDIN",  reach:  4000, engagements:  440, followers:  2940, posts:  9, color: "#0a66c2", engRate: 3.1 },
+  { name: "Facebook",  platform: "FACEBOOK",  reach:  8200, engagements:  920, followers:  5100, posts: 12, color: "#1877f2", engRate: 5.2 },
 ];
 
 const TOP_POSTS = [
-  { id: "1", content: "🚀 AI content generation just got smarter. Most teams spend 6+ hrs/week writing posts. We turned that into 6 minutes.", platform: "TWITTER" as SocialPlatform,   reach: 9100, engagements: 820, engRate: 9.0, date: "May 17" },
-  { id: "2", content: "Behind every great post is a great strategy ✨ We've been quietly building something that helps brands show up consistently.", platform: "INSTAGRAM" as SocialPlatform, reach: 7200, engagements: 680, engRate: 9.4, date: "May 15" },
-  { id: "3", content: "After analyzing 10,000 LinkedIn posts, here's what separates viral content from posts that get 12 likes:", platform: "LINKEDIN" as SocialPlatform,  reach: 5800, engagements: 520, engRate: 8.7, date: "May 13" },
-  { id: "4", content: "Hot take: Your brand voice matters more than your posting frequency. Consistency in tone builds trust.", platform: "TWITTER" as SocialPlatform,   reach: 4900, engagements: 440, engRate: 6.2, date: "May 12" },
-  { id: "5", content: "This is what your content calendar looks like with AI 🤯 Week 1: Done ✅ Week 2: Done ✅ Week 3: Done ✅", platform: "INSTAGRAM" as SocialPlatform, reach: 4200, engagements: 380, engRate: 5.8, date: "May 9" },
+  { id: "1", content: "Behind every great post is a great strategy ✨ We've been quietly building something that helps brands show up consistently.", platform: "INSTAGRAM" as SocialPlatform, reach: 9100, engagements: 820, engRate: 9.4, date: "May 17" },
+  { id: "2", content: "After analyzing 10,000 LinkedIn posts, here's what separates viral content from posts that get 12 likes:", platform: "LINKEDIN" as SocialPlatform,  reach: 7200, engagements: 680, engRate: 8.7, date: "May 15" },
+  { id: "3", content: "This is what your content calendar looks like with AI 🤯 Week 1: Done ✅ Week 2: Done ✅ Week 3: Done ✅", platform: "INSTAGRAM" as SocialPlatform, reach: 5800, engagements: 520, engRate: 7.2, date: "May 13" },
+  { id: "4", content: "Hot take: Your brand voice matters more than your posting frequency. Consistency in tone builds trust.", platform: "LINKEDIN" as SocialPlatform,   reach: 4900, engagements: 440, engRate: 6.2, date: "May 12" },
+  { id: "5", content: "🚀 AI content generation just got smarter. Most teams spend 6+ hrs/week writing posts. We turned that into 6 minutes.", platform: "INSTAGRAM" as SocialPlatform, reach: 4200, engagements: 380, engRate: 5.8, date: "May 9" },
 ];
 
 const BEST_HOURS = [
@@ -141,6 +142,41 @@ function StatCard({ label, value, delta, icon: Icon, iconColor, iconBg, sub }: S
 export default function AnalyticsPage() {
   const [range, setRange] = useState<Range>("7 days");
   const [metric, setMetric] = useState<"reach" | "engagements" | "followers">("reach");
+  const [hasAccounts, setHasAccounts] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    fetch("/api/accounts")
+      .then((r) => r.json())
+      .then((data) => setHasAccounts(Array.isArray(data) && data.length > 0))
+      .catch(() => setHasAccounts(false));
+  }, []);
+
+  if (hasAccounts === null) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="h-5 w-5 rounded-full border-2 animate-spin" style={{ borderColor: "var(--brand-500)", borderTopColor: "transparent" }} />
+      </div>
+    );
+  }
+
+  if (!hasAccounts) {
+    return (
+      <div className="max-w-lg mx-auto mt-16 flex flex-col items-center text-center space-y-5">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl" style={{ backgroundColor: "var(--surface-100)" }}>
+          <BarChart2 className="h-8 w-8" style={{ color: "var(--ink-muted)" }} />
+        </div>
+        <div>
+          <h2 className="text-base font-semibold" style={{ color: "var(--ink-primary)" }}>No data yet</h2>
+          <p className="text-sm mt-1 leading-relaxed" style={{ color: "var(--ink-secondary)" }}>
+            Connect at least one social account to start seeing real reach, engagement, and follower analytics.
+          </p>
+        </div>
+        <a href="/accounts">
+          <Button leftIcon={<Link2 className="h-4 w-4" />}>Connect accounts</Button>
+        </a>
+      </div>
+    );
+  }
 
   const data = DATA_BY_RANGE[range];
   const deltas = STAT_DELTAS[range];
@@ -152,6 +188,15 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-5 max-w-[1400px]">
+      {/* Sample data notice */}
+      <div className="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs"
+        style={{ backgroundColor: "rgba(146,64,14,0.06)", border: "1px solid rgba(146,64,14,0.2)", color: "var(--warning)" }}>
+        <Zap className="h-3.5 w-3.5 shrink-0" />
+        <span>
+          <strong>Sample data</strong> — Instagram analytics will populate here automatically once your account is connected and posts are published.
+        </span>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -375,7 +420,7 @@ export default function AnalyticsPage() {
               { icon: TrendingUp, color: "var(--success)",   bg: "rgba(22,101,52,0.08)",  title: "Reach up 24%", desc: "Instagram driving the growth this week" },
               { icon: Heart,      color: "#e11d48",          bg: "rgba(225,29,72,0.08)",   title: "Best engagement day: Saturday", desc: "Posts at 6 PM get 3× more likes" },
               { icon: BarChart2,  color: "var(--brand-500)", bg: "rgba(23,122,65,0.08)",   title: "51 posts published", desc: `Up 8% from last ${range}` },
-              { icon: Users,      color: "#0a66c2",          bg: "rgba(10,102,194,0.08)",  title: "+250 new followers", desc: "Twitter growing fastest at 18%/wk" },
+              { icon: Users,      color: "#0a66c2",          bg: "rgba(10,102,194,0.08)",  title: "+250 new followers", desc: "Instagram growing fastest at 18%/wk" },
             ].map(({ icon: Icon, color, bg, title, desc }) => (
               <div key={title}
                 className="flex items-start gap-3 rounded-xl p-3 transition-colors"

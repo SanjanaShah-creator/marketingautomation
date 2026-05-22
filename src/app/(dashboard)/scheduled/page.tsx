@@ -12,9 +12,6 @@ import { cn } from "@/lib/utils";
 
 // ── Platform SVGs ──────────────────────────────────────────────────────────
 
-function TwitterSvg({ className }: { className?: string }) {
-  return <svg className={className} viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.741l7.73-8.835L1.254 2.25H8.08l4.261 5.635L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" /></svg>;
-}
 function InstagramSvg({ className }: { className?: string }) {
   return <svg className={className} viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" /></svg>;
 }
@@ -23,10 +20,10 @@ function LinkedInSvg({ className }: { className?: string }) {
 }
 
 const PLATFORM_ICONS: Record<string, React.FC<{ className?: string }>> = {
-  Twitter: TwitterSvg, Instagram: InstagramSvg, LinkedIn: LinkedInSvg,
+  Instagram: InstagramSvg, LinkedIn: LinkedInSvg,
 };
 const PLATFORM_COLORS: Record<string, string> = {
-  Twitter: "#1da1f2", Instagram: "#e1306c", LinkedIn: "#0a66c2",
+  Instagram: "#e1306c", LinkedIn: "#0a66c2",
 };
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -50,12 +47,12 @@ const now = new Date();
 const d = (h: number) => new Date(now.getTime() + h * 3600000);
 
 const mockPosts: ScheduledPost[] = [
-  { id: "1", content: "🚀 Exciting news! We're launching our new AI-powered content suite next week. Early access spots are limited — sign up now to be first in line. #ProductLaunch #SaaS", platforms: ["Twitter", "LinkedIn"], scheduledAt: d(2),  status: "scheduled" },
+  { id: "1", content: "🚀 Exciting news! We're launching our new AI-powered content suite next week. Early access spots are limited — sign up now to be first in line. #ProductLaunch #SaaS", platforms: ["Instagram", "LinkedIn"], scheduledAt: d(2),  status: "scheduled" },
   { id: "2", content: "Behind the scenes: our team sprint planning session. This is how we ship features fast while keeping quality high. ✨", platforms: ["Instagram"], scheduledAt: d(5),  status: "scheduled", imageUrl: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=320&h=200&fit=crop&auto=format&q=80" },
-  { id: "3", content: "📊 New blog post: '10 social media metrics that actually matter in 2025'. Link in bio!", platforms: ["Twitter", "LinkedIn", "Instagram"], scheduledAt: d(18), status: "failed" },
+  { id: "3", content: "📊 New blog post: '10 social media metrics that actually matter in 2025'. Link in bio!", platforms: ["LinkedIn", "Instagram"], scheduledAt: d(18), status: "failed" },
   { id: "4", content: "Customer spotlight: how @acmecorp grew their engagement by 3× in 60 days using our platform.", platforms: ["LinkedIn"], scheduledAt: d(26), status: "scheduled" },
-  { id: "5", content: "Weekend tip: batch your content creation on Fridays so you can enjoy your weekends ☀️ #WorkSmart", platforms: ["Twitter", "Instagram"], scheduledAt: d(36), status: "paused" },
-  { id: "6", content: "Q: What's the #1 mistake brands make on social media?\n\nA: Posting without a strategy.\n\nHere's the 3-step framework we use with our clients 🧵", platforms: ["Twitter"], scheduledAt: d(50), status: "scheduled" },
+  { id: "5", content: "Weekend tip: batch your content creation on Fridays so you can enjoy your weekends ☀️ #WorkSmart", platforms: ["Instagram"], scheduledAt: d(36), status: "paused" },
+  { id: "6", content: "Q: What's the #1 mistake brands make on social media?\n\nA: Posting without a strategy.\n\nHere's the 3-step framework we use with our clients.", platforms: ["LinkedIn", "Instagram"], scheduledAt: d(50), status: "scheduled" },
   { id: "7", content: "Monday motivation: 'The best time to plant a tree was 20 years ago. The second best time is now.' Start building your social presence today 🌱", platforms: ["Instagram", "LinkedIn"], scheduledAt: d(72), status: "scheduled" },
 ];
 
@@ -74,24 +71,24 @@ function getWeekDays() {
 
 const WEEK_SUGGESTIONS: Record<number, WeekPost[]> = {
   0: [
-    { id: "w0a", platform: "Twitter",   time: "09:00", tags: ["#MondayMotivation", "#Marketing"], content: "Monday mindset: The brands that win on social aren't the ones with the biggest budgets — they're the ones with the most consistent voice. What's yours? 💬 #MondayMotivation" },
+    { id: "w0a", platform: "Instagram",   time: "09:00", tags: ["#MondayMotivation", "#Marketing"], content: "Monday mindset: The brands that win on social aren't the ones with the biggest budgets — they're the ones with the most consistent voice. What's yours? 💬 #MondayMotivation" },
     { id: "w0b", platform: "LinkedIn",  time: "17:00", tags: ["#ContentStrategy", "#B2B"],         content: "Starting this week with a question: How much time does your team spend on content creation vs. content strategy? Most brands have it backwards. Here's what we'd change 👇\n\n#ContentStrategy #MarketingLeadership" },
   ],
   1: [
     { id: "w1a", platform: "Instagram", time: "11:00", tags: ["#ContentTips", "#BrandVoice"],    content: "3 things that actually grow your Instagram in 2025:\n\n1. Consistency > virality\n2. Comments > likes\n3. Saves = algorithm gold\n\nDouble tap if you're saving this #ContentTips #InstagramGrowth" },
-    { id: "w1b", platform: "Twitter",   time: "15:00", tags: ["#SaaS", "#Marketing"],              content: "Hot take: Most 'social media strategies' are just posting schedules.\n\nA real strategy has: audience insight, voice guidelines, content pillars, and feedback loops.\n\nHow many of those does yours have? #MarketingStrategy" },
+    { id: "w1b", platform: "Instagram",   time: "15:00", tags: ["#SaaS", "#Marketing"],              content: "Hot take: Most 'social media strategies' are just posting schedules.\n\nA real strategy has: audience insight, voice guidelines, content pillars, and feedback loops.\n\nHow many of those does yours have? #MarketingStrategy" },
   ],
   2: [
     { id: "w2a", platform: "LinkedIn",  time: "10:00", tags: ["#Leadership", "#AI"],               content: "We've been experimenting with AI-generated content for 6 months.\n\nHere's what surprised us most: the best outputs came when we gave the AI our brand guidelines, not just a topic.\n\nContext is everything. #AIMarketing #ContentCreation" },
     { id: "w2b", platform: "Instagram", time: "18:00", tags: ["#BehindTheScenes", "#Startup"],     content: "Midweek check-in ✨\n\nOur team just hit a milestone we've been working toward for 3 months. We can't share the details yet — but we can say we're incredibly proud.\n\nStay tuned 👀 #BuildInPublic" },
   ],
   3: [
-    { id: "w3a", platform: "Twitter",   time: "09:00", tags: ["#ThrowbackThursday", "#Journey"],   content: "TBT to when our 'content calendar' was a sticky note on a monitor.\n\nNow it's AI-powered and schedules itself.\n\nGrowth is wild. 🙌 #ThrowbackThursday #FounderLife" },
+    { id: "w3a", platform: "Instagram",   time: "09:00", tags: ["#ThrowbackThursday", "#Journey"],   content: "TBT to when our 'content calendar' was a sticky note on a monitor.\n\nNow it's AI-powered and schedules itself.\n\nGrowth is wild. 🙌 #ThrowbackThursday #FounderLife" },
     { id: "w3b", platform: "LinkedIn",  time: "16:00", tags: ["#DataDriven", "#Analytics"],        content: "Data point of the week: Posts published at 5–7 PM on weekdays get 34% more engagement than morning posts.\n\nWe've been running this experiment for 3 months.\n\nSave this and test it with your own audience 📊 #SocialMediaAnalytics" },
   ],
   4: [
     { id: "w4a", platform: "Instagram", time: "12:00", tags: ["#FridayFeeling", "#TGIF"],          content: "It's Friday. You made it. 🎉\n\nQuick reminder: you don't need to post every day to grow. You need to post consistently with intention.\n\nSchedule your posts for next week this weekend. Your future self will thank you. #FridayFeeling #ContentCreator" },
-    { id: "w4b", platform: "Twitter",   time: "17:00", tags: ["#WeekendRead", "#Marketing"],       content: "Weekend reading list for marketers:\n\n📖 'Building a Story Brand' by Donald Miller\n📖 'Contagious' by Jonah Berger\n📖 'This Is Marketing' by Seth Godin\n\nWhat's on your list? 👇 #MarketingBooks" },
+    { id: "w4b", platform: "Instagram",   time: "17:00", tags: ["#WeekendRead", "#Marketing"],       content: "Weekend reading list for marketers:\n\n📖 'Building a Story Brand' by Donald Miller\n📖 'Contagious' by Jonah Berger\n📖 'This Is Marketing' by Seth Godin\n\nWhat's on your list? 👇 #MarketingBooks" },
   ],
   5: [
     { id: "w5a", platform: "Instagram", time: "10:00", tags: ["#Weekend", "#ContentCreation"],     content: "Saturday content tip ☀️\n\nBatch create your week's content in one sitting. Pick a topic, write 5 variations, schedule them spread out.\n\nYou'll save 4+ hours every week and never run out of ideas.\n\nSave this post 📌 #ContentBatching #SocialMediaTips" },

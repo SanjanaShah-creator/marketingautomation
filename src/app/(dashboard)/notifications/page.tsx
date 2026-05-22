@@ -26,12 +26,12 @@ interface Notification {
 const INITIAL_NOTIFICATIONS: Notification[] = [
   { id: "n1",  type: "POST_PUBLISHED",      title: "Instagram post published",       body: "Your post got 1,240 impressions in the first hour.",                   read: false, createdAt: new Date(Date.now() - 15 * 60000),       action: { label: "View analytics", href: "/analytics" } },
   { id: "n2",  type: "AI_CREDITS_LOW",       title: "AI credits running low",          body: "You have 8 AI credits remaining. Upgrade for unlimited generation.",     read: false, createdAt: new Date(Date.now() - 40 * 60000),       action: { label: "Upgrade plan", href: "/settings/billing" } },
-  { id: "n3",  type: "POST_FAILED",          title: "Twitter post failed",             body: "Could not publish your post — access token expired. Reconnect.",       read: false, createdAt: new Date(Date.now() - 2 * 3600000),      action: { label: "Reconnect account", href: "/accounts" } },
+  { id: "n3",  type: "POST_FAILED",          title: "Instagram post failed",           body: "Could not publish your post — access token expired. Reconnect.",       read: false, createdAt: new Date(Date.now() - 2 * 3600000),      action: { label: "Reconnect account", href: "/accounts" } },
   { id: "n4",  type: "TEAM_JOINED",          title: "Sarah joined your workspace",     body: "Sarah Chen accepted your invite as an Editor.",                         read: true,  createdAt: new Date(Date.now() - 5 * 3600000) },
   { id: "n5",  type: "POST_SCHEDULED",       title: "5 posts scheduled",               body: "Your content queue is set for the next 3 days.",                        read: true,  createdAt: new Date(Date.now() - 24 * 3600000) },
   { id: "n6",  type: "ACCOUNT_DISCONNECTED", title: "LinkedIn account disconnected",   body: "Your LinkedIn session expired. Reconnect to keep posting.",             read: true,  createdAt: new Date(Date.now() - 2 * 24 * 3600000), action: { label: "Reconnect", href: "/accounts" } },
   { id: "n7",  type: "POST_PUBLISHED",       title: "LinkedIn post published",         body: "3 posts went live today across your connected accounts.",               read: true,  createdAt: new Date(Date.now() - 3 * 24 * 3600000) },
-  { id: "n8",  type: "SYSTEM",               title: "New feature: AI Thread Composer", body: "Generate fully structured Twitter threads with one click using AI.",    read: true,  createdAt: new Date(Date.now() - 7 * 24 * 3600000), action: { label: "Try it now", href: "/compose" } },
+  { id: "n8",  type: "SYSTEM",               title: "New feature: AI Caption Writer",  body: "Generate engaging Instagram captions and LinkedIn posts with one click.", read: true,  createdAt: new Date(Date.now() - 7 * 24 * 3600000), action: { label: "Try it now", href: "/compose" } },
 ];
 
 const TYPE_META: Record<NotificationType, { icon: React.FC<{className?: string}>; color: string; bg: string }> = {
