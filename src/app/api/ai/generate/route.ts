@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import OpenAI from "openai";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
@@ -6,7 +7,7 @@ import { z } from "zod";
 const generateSchema = z.object({
   prompt: z.string().min(1).max(2000),
   tone: z.enum(["professional", "casual", "humorous", "inspiring", "educational", "bold"]).default("professional"),
-  platforms: z.array(z.string()).default(["TWITTER"]),
+  platforms: z.array(z.string()).default(["INSTAGRAM"]),
   variations: z.number().min(1).max(5).default(3),
   workspaceId: z.string().cuid(),
 });
@@ -25,77 +26,97 @@ export async function POST(req: NextRequest) {
 
   const { prompt, tone, platforms, variations, workspaceId } = parsed.data;
 
-  // Load workspace brand context
   const workspace = await prisma.workspace.findUnique({
     where: { id: workspaceId },
     select: {
-      brandName: true,
-      brandDescription: true,
-      brandVoice: true,
-      brandKeywords: true,
-      brandColors: true,
-      websiteUrl: true,
+      brandName: true, brandDescription: true,
+      brandVoice: true, brandKeywords: true, websiteUrl: true, aiCredits: true,
     },
   });
 
-  const primaryLimit = PLATFORM_LIMITS[platforms[0]] ?? 280;
-  const activeTone   = workspace?.brandVoice ?? tone;
+  if (!workspace) return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
+  if (workspace.aiCredits <= 0) return NextResponse.json({ error: "No AI credits remaining" }, { status: 402 });
 
-  // Build brand context block
-  const brandContext = workspace?.brandName
-    ? `
-Brand context:
-- Brand name: ${workspace.brandName}
-- Website: ${workspace.websiteUrl ?? "not set"}
-- Description: ${workspace.brandDescription ?? "not provided"}
-- Brand voice: ${activeTone}
-- Key topics/keywords: ${(workspace.brandKeywords ?? []).join(", ") || "none"}
+  const primaryLimit = PLATFORM_LIMITS[platforms[0]] ?? 2200;
+  const activeTone = workspace.brandVoice ?? tone;
 
-Always write AS this brand. Match the brand voice. Reference the brand's niche and topics naturally.`
-    : "";
+  const brandBlock = workspace.brandName
+    ? `Brand: ${workspace.brandName}
+Description: ${workspace.brandDescription ?? "not set"}
+Keywords/niche: ${(workspace.brandKeywords ?? []).join(", ") || "none"}
+Voice: ${activeTone}`
+    : `Voice: ${activeTone}`;
 
-  const systemPrompt = `You are an expert social media copywriter.${brandContext}
+  const systemPrompt = `You are an expert social media copywriter. Write exactly ${variations} unique post variations.
 
-Generate ${variations} unique, engaging post variations based on:
-Topic: ${prompt}
-Tone: ${activeTone}
-Platform(s): ${platforms.join(", ")}
+${brandBlock}
+Platform: ${platforms.join(", ")}
 Character limit: ${primaryLimit}
 
-Return a JSON array of strings, each being one variation. Include relevant emojis and hashtags naturally. Stay within the character limit.`;
+Rules:
+- Each variation must be distinct in angle and structure
+- Include relevant emojis naturally (not excessively)
+- Add 3–5 hashtags at the end
+- Stay within the character limit
+- Write as the brand, not about the brand
 
-  // ── Production: uncomment to use Claude ──────────────────────────────────────
-  // import Anthropic from "@anthropic-ai/sdk";
-  // const client = new Anthropic();
-  // const message = await client.messages.create({
-  //   model: "claude-opus-4-7",
-  //   max_tokens: 1024,
-  //   messages: [{ role: "user", content: systemPrompt }],
-  // });
-  // const rawText = message.content[0].type === "text" ? message.content[0].text : "";
-  // const variations_out = JSON.parse(rawText.match(/\[[\s\S]*\]/)?.[0] ?? "[]");
-  // return NextResponse.json({ variations: variations_out, tokensUsed: message.usage.input_tokens + message.usage.output_tokens, model: "claude-opus-4-7" });
-  // ─────────────────────────────────────────────────────────────────────────────
+Return ONLY a valid JSON array of strings, no markdown, no explanation:
+["variation 1", "variation 2", ...]`;
 
-  const brandName = workspace?.brandName ?? "us";
-  const mockVariations = Array.from({ length: variations }, (_, i) => {
-    const templates = [
-      `🚀 ${prompt}\n\nAt ${brandName}, this is how we see it changing everything. The future is already here.\n\n#Innovation #${brandName.replace(/\s+/g, "")}`,
-      `Here's what we've been thinking about at ${brandName}:\n\n${prompt}\n\nWhat's your take? Drop your thoughts 👇\n\n#${brandName.replace(/\s+/g, "")} #Community`,
-      `Big idea incoming 💡\n\n${prompt}\n\nWe're building this into everything we do at ${brandName}. Stay tuned.\n\n✨ Follow for more`,
-      `The truth about ${prompt}:\n\nMost people get this wrong. At ${brandName}, we've learned the hard way what actually works.\n\nThread 🧵👇`,
-      `${prompt} — here's our take at ${brandName}:\n\n→ It starts with the right mindset\n→ Then comes consistent action\n→ Results follow\n\n#Growth #Marketing`,
-    ];
-    return templates[i % templates.length];
-  });
+  try {
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  // Log the system prompt so devs can see what would be sent to Claude
-  console.log("[AI Generate] System prompt preview:", systemPrompt.slice(0, 300));
+    const completion = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `Topic: ${prompt}` },
+      ],
+      temperature: 0.85,
+      max_tokens: 1200,
+      response_format: { type: "json_object" },
+    });
 
-  return NextResponse.json({
-    variations: mockVariations,
-    tokensUsed: 245,
-    model: "claude-opus-4-7",
-    brandContext: workspace?.brandName ? { name: workspace.brandName, voice: activeTone } : null,
-  });
+    const raw = completion.choices[0].message.content ?? "{}";
+
+    // Parse: model returns { variations: [...] } or a raw array
+    let variationsOut: string[] = [];
+    try {
+      const parsed = JSON.parse(raw);
+      variationsOut = Array.isArray(parsed)
+        ? parsed
+        : parsed.variations ?? parsed.posts ?? Object.values(parsed)[0] ?? [];
+    } catch {
+      variationsOut = [];
+    }
+
+    // Deduct 1 credit
+    await prisma.workspace.update({
+      where: { id: workspaceId },
+      data: { aiCredits: { decrement: 1 } },
+    });
+
+    // Log generation
+    await prisma.aIGeneration.create({
+      data: {
+        workspaceId,
+        userId: session.user.id,
+        type: "POST_CAPTION",
+        prompt,
+        output: JSON.stringify(variationsOut),
+        model: "gpt-4o-mini",
+        tokensUsed: completion.usage?.total_tokens ?? 0,
+      },
+    });
+
+    return NextResponse.json({
+      variations: variationsOut,
+      tokensUsed: completion.usage?.total_tokens ?? 0,
+      model: "gpt-4o-mini",
+      creditsRemaining: workspace.aiCredits - 1,
+    });
+  } catch (error) {
+    console.error("[AI Generate]", error);
+    return NextResponse.json({ error: "AI generation failed" }, { status: 500 });
+  }
 }
