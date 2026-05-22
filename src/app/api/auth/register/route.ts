@@ -57,6 +57,9 @@ export async function POST(req: NextRequest) {
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("[Register] error:", msg);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    if (msg.includes("Invalid URL") || msg.includes("ENOTFOUND") || msg.includes("connect")) {
+      return NextResponse.json({ error: "Database connection error. Please try again in a moment." }, { status: 503 });
+    }
+    return NextResponse.json({ error: "Registration failed. Please try again." }, { status: 500 });
   }
 }
