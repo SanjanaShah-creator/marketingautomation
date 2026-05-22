@@ -121,19 +121,8 @@ export default function LoginPage() {
 
       {/* Card */}
       <div className="rounded-3xl p-6 shadow-sm" style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}>
-        {/* Google OAuth */}
-        <Button variant="secondary" size="sm" className="w-full gap-2 mb-5"
-          onClick={handleGoogleSignIn} loading={googleLoading} type="button">
-          <GoogleIcon className="h-4 w-4" />
-          Continue with Google
-        </Button>
 
-        {/* Divider */}
-        <div className="relative mb-5 flex items-center gap-3">
-          <div className="h-px flex-1" style={{ backgroundColor: "var(--border)" }} />
-          <span className="text-xs" style={{ color: "var(--ink-tertiary)" }}>or continue with email</span>
-          <div className="h-px flex-1" style={{ backgroundColor: "var(--border)" }} />
-        </div>
+
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-3.5">

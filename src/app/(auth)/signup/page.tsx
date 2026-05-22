@@ -119,18 +119,8 @@ export default function SignupPage() {
 
       {/* Card */}
       <div className="rounded-3xl p-6 shadow-sm" style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}>
-        {/* Google OAuth */}
-        <Button variant="secondary" size="sm" className="w-full gap-2 mb-5"
-          onClick={handleGoogleSignIn} loading={googleLoading} type="button">
-          <GoogleIcon className="h-4 w-4" />
-          Sign up with Google
-        </Button>
 
-        <div className="relative mb-5 flex items-center gap-3">
-          <div className="h-px flex-1" style={{ backgroundColor: "var(--border)" }} />
-          <span className="text-xs" style={{ color: "var(--ink-tertiary)" }}>or sign up with email</span>
-          <div className="h-px flex-1" style={{ backgroundColor: "var(--border)" }} />
-        </div>
+
 
         <form onSubmit={handleSubmit} className="space-y-3.5">
           <div className="grid grid-cols-2 gap-3">

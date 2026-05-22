@@ -12,11 +12,17 @@ const registerSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  if (!process.env.DATABASE_URL) {
+    console.error("[Register] DATABASE_URL not configured");
+    return NextResponse.json({ error: "Server configuration error. Please contact support." }, { status: 503 });
+  }
+
   try {
     const body = await req.json();
     const parsed = registerSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 422 });
+      const msg = parsed.error.issues[0]?.message ?? "Invalid input";
+      return NextResponse.json({ error: msg }, { status: 422 });
     }
 
     const { name, email, password, workspaceName } = parsed.data;
@@ -28,8 +34,8 @@ export async function POST(req: NextRequest) {
 
     const passwordHash = await bcrypt.hash(password, 12);
 
-    const wsName = workspaceName ?? name;
-    const baseSlug = slugify(wsName);
+    const wsName = (workspaceName?.trim() || name).trim();
+    const baseSlug = slugify(wsName) || "workspace";
     let slug = baseSlug;
     let suffix = 0;
     while (await prisma.workspace.findUnique({ where: { slug } })) {
@@ -37,25 +43,26 @@ export async function POST(req: NextRequest) {
       slug = `${baseSlug}-${suffix}`;
     }
 
-    await prisma.user.create({
-      data: {
-        name,
-        email,
-        passwordHash,
-        workspaceMembers: {
-          create: {
-            role: "OWNER",
-            workspace: {
-              create: { name: wsName, slug },
-            },
-          },
-        },
-      },
+    await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: { name, email, passwordHash },
+      });
+      const workspace = await tx.workspace.create({
+        data: { name: wsName, slug },
+      });
+      await tx.workspaceMember.create({
+        data: { userId: user.id, workspaceId: workspace.id, role: "OWNER" },
+      });
     });
 
     return NextResponse.json({ ok: true }, { status: 201 });
-  } catch (e) {
-    console.error("[Register]", e);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[Register] error:", msg);
+    // surface DB-related errors clearly
+    if (msg.includes("connect") || msg.includes("ENOTFOUND") || msg.includes("timeout")) {
+      return NextResponse.json({ error: "Could not connect to database. Please try again." }, { status: 503 });
+    }
     return NextResponse.json({ error: "Registration failed. Please try again." }, { status: 500 });
   }
 }
