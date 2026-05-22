@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
+import { SessionProvider } from "next-auth/react";
 
 interface ThemeContextValue {
   theme: "light";
@@ -16,9 +17,11 @@ const ThemeContext = createContext<ThemeContextValue>({
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeContext.Provider value={{ theme: "light", toggle: () => {}, setTheme: () => {} }}>
-      {children}
-    </ThemeContext.Provider>
+    <SessionProvider>
+      <ThemeContext.Provider value={{ theme: "light", toggle: () => {}, setTheme: () => {} }}>
+        {children}
+      </ThemeContext.Provider>
+    </SessionProvider>
   );
 }
 

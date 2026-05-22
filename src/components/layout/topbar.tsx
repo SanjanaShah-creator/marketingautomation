@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import {
   Bell, Search, Plus, Command, X,
   CheckCircle2, Clock, AlertCircle, Info,
@@ -29,10 +30,10 @@ const PAGE_TITLES: Record<string, string> = {
 };
 
 const mockNotifications = [
-  { id: "1", type: "success", title: "Post published", body: "Your Instagram post went live", time: new Date(Date.now() - 3 * 60000) },
-  { id: "2", type: "warning", title: "Scheduled reminder", body: "3 posts scheduled for tomorrow", time: new Date(Date.now() - 20 * 60000) },
-  { id: "3", type: "error", title: "Publishing failed", body: "Twitter post couldn't be published", time: new Date(Date.now() - 2 * 3600000) },
-  { id: "4", type: "info", title: "Team joined", body: "Sarah added to your workspace", time: new Date(Date.now() - 5 * 3600000) },
+  { id: "1", type: "success", title: "Post published",      body: "Your Instagram post went live",     time: new Date(Date.now() - 3 * 60000) },
+  { id: "2", type: "warning", title: "Scheduled reminder",  body: "3 posts scheduled for tomorrow",    time: new Date(Date.now() - 20 * 60000) },
+  { id: "3", type: "error",   title: "Publishing failed",   body: "Post couldn't be published",        time: new Date(Date.now() - 2 * 3600000) },
+  { id: "4", type: "info",    title: "Team joined",         body: "New member added to your workspace", time: new Date(Date.now() - 5 * 3600000) },
 ];
 
 const notifIcon: Record<string, React.FC<{ className?: string }>> = {
@@ -45,25 +46,31 @@ const notifIcon: Record<string, React.FC<{ className?: string }>> = {
 const notifColors: Record<string, string> = {
   success: "text-[#34d399]",
   warning: "text-[#fbbf24]",
-  error: "text-[#f87171]",
-  info: "text-[#60a5fa]",
+  error:   "text-[#f87171]",
+  info:    "text-[#60a5fa]",
 };
 
 export function Topbar() {
-  const pathname  = usePathname();
-  const router    = useRouter();
-  const [searchOpen, setSearchOpen]   = useState(false);
-  const [notifOpen, setNotifOpen]     = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const pathname = usePathname();
+  const router   = useRouter();
+  const { data: session } = useSession();
+
+  const [searchOpen,   setSearchOpen]   = useState(false);
+  const [notifOpen,    setNotifOpen]    = useState(false);
+  const [profileOpen,  setProfileOpen]  = useState(false);
+  const [searchQuery,  setSearchQuery]  = useState("");
   const [unread] = useState(2);
 
+  const userName  = session?.user?.name  ?? "User";
+  const userEmail = session?.user?.email ?? "";
+
   async function handleSignOut() {
-    await fetch("/api/auth/signout", { method: "POST" });
-    router.push("/login");
+    await signOut({ callbackUrl: "/login" });
   }
 
-  const title = Object.entries(PAGE_TITLES).find(([key]) => pathname === key || pathname.startsWith(key + "/"))?.[1] ?? "Dashboard";
+  const title = Object.entries(PAGE_TITLES).find(
+    ([key]) => pathname === key || pathname.startsWith(key + "/")
+  )?.[1] ?? "Dashboard";
 
   return (
     <header
@@ -93,7 +100,6 @@ export function Topbar() {
 
       {/* Right actions */}
       <div className="flex items-center gap-1.5">
-        {/* Search icon (mobile) */}
         <button
           onClick={() => setSearchOpen(true)}
           className="flex md:hidden h-8 w-8 items-center justify-center rounded-lg transition-all"
@@ -104,8 +110,8 @@ export function Topbar() {
           <Search className="h-4 w-4" />
         </button>
 
-        {/* New Post */}
-        <Button size="sm" className="hidden sm:flex gap-1.5" leftIcon={<Plus className="h-3.5 w-3.5" />}>
+        <Button size="sm" className="hidden sm:flex gap-1.5" leftIcon={<Plus className="h-3.5 w-3.5" />}
+          onClick={() => router.push("/compose")}>
           New Post
         </Button>
 
@@ -143,12 +149,9 @@ export function Topbar() {
                       <span className="text-sm font-semibold" style={{ color: "var(--ink-primary)" }}>Notifications</span>
                       {unread > 0 && <Badge variant="default" className="px-1.5 py-0 text-2xs">{unread} new</Badge>}
                     </div>
-                    <button
-                      className="text-2xs transition-colors"
-                      style={{ color: "var(--ink-tertiary)" }}
+                    <button className="text-2xs transition-colors" style={{ color: "var(--ink-tertiary)" }}
                       onMouseEnter={(e) => { e.currentTarget.style.color = "var(--ink-secondary)"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.color = "var(--ink-tertiary)"; }}
-                    >
+                      onMouseLeave={(e) => { e.currentTarget.style.color = "var(--ink-tertiary)"; }}>
                       Mark all read
                     </button>
                   </div>
@@ -156,16 +159,12 @@ export function Topbar() {
                     {mockNotifications.map((n, i) => {
                       const Icon = notifIcon[n.type];
                       return (
-                        <div
-                          key={n.id}
-                          className={cn(
-                            "flex items-start gap-3 p-4 cursor-pointer transition-colors",
-                            i < mockNotifications.length - 1 && "border-b",
-                            i < unread ? "bg-[rgba(97,114,243,0.04)]" : ""
-                          )}
+                        <div key={n.id}
+                          className={cn("flex items-start gap-3 p-4 cursor-pointer transition-colors",
+                            i < mockNotifications.length - 1 && "border-b")}
                           style={{ borderColor: "var(--border-subtle)" }}
                           onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--border-subtle)"; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = i < unread ? "rgba(97,114,243,0.04)" : ""; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; }}
                         >
                           <Icon className={cn("h-4 w-4 shrink-0 mt-0.5", notifColors[n.type])} />
                           <div className="flex-1 min-w-0">
@@ -181,6 +180,7 @@ export function Topbar() {
                     <button
                       className="w-full rounded-lg py-2 text-xs font-medium transition-colors"
                       style={{ color: "var(--brand-500)" }}
+                      onClick={() => { setNotifOpen(false); router.push("/notifications"); }}
                       onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--border-subtle)"; }}
                       onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; }}
                     >
@@ -197,9 +197,10 @@ export function Topbar() {
         <div className="relative">
           <button
             onClick={() => setProfileOpen(!profileOpen)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg hover:ring-2 hover:ring-[rgba(97,114,243,0.4)] transition-all"
+            className="flex h-8 w-8 items-center justify-center rounded-lg transition-all"
+            style={{ outline: profileOpen ? "2px solid var(--brand-500)" : undefined }}
           >
-            <UserAvatar name="Alex Johnson" size="sm" />
+            <UserAvatar name={userName} image={session?.user?.image ?? undefined} size="sm" />
           </button>
 
           <AnimatePresence>
@@ -216,10 +217,10 @@ export function Topbar() {
                 >
                   {/* User info */}
                   <div className="flex items-center gap-3 p-4 border-b" style={{ borderColor: "var(--border)" }}>
-                    <UserAvatar name="Alex Johnson" size="md" />
+                    <UserAvatar name={userName} image={session?.user?.image ?? undefined} size="md" />
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold truncate" style={{ color: "var(--ink-primary)" }}>Alex Johnson</p>
-                      <p className="text-xs truncate" style={{ color: "var(--ink-tertiary)" }}>alex@company.com</p>
+                      <p className="text-sm font-semibold truncate" style={{ color: "var(--ink-primary)" }}>{userName}</p>
+                      <p className="text-xs truncate" style={{ color: "var(--ink-tertiary)" }}>{userEmail}</p>
                     </div>
                   </div>
 
@@ -240,19 +241,6 @@ export function Topbar() {
                         <ChevronRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </button>
                     ))}
-                  </div>
-
-                  {/* Workspace badge */}
-                  <div className="mx-3 mb-2 rounded-xl px-3 py-2.5 border"
-                    style={{ backgroundColor: "rgba(107,191,138,0.08)", borderColor: "rgba(107,191,138,0.15)" }}>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium" style={{ color: "var(--ink-primary)" }}>Acme Inc.</p>
-                        <p className="text-2xs" style={{ color: "var(--ink-tertiary)" }}>Growth plan · 50 AI credits left</p>
-                      </div>
-                      <span className="rounded-full px-2 py-0.5 text-2xs font-medium"
-                        style={{ backgroundColor: "rgba(107,191,138,0.2)", color: "var(--brand-500)" }}>Growth</span>
-                    </div>
                   </div>
 
                   {/* Sign out */}
@@ -279,9 +267,7 @@ export function Topbar() {
         {searchOpen && (
           <>
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="fixed inset-0 z-50 backdrop-blur-sm"
               style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
               onClick={() => setSearchOpen(false)}
@@ -300,8 +286,9 @@ export function Topbar() {
                   autoFocus
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Escape" && setSearchOpen(false)}
                   placeholder="Search posts, accounts, settings…"
-                  className="flex-1 bg-transparent text-sm focus:outline-none placeholder:text-[var(--ink-tertiary)]"
+                  className="flex-1 bg-transparent text-sm focus:outline-none"
                   style={{ color: "var(--ink-primary)" }}
                 />
                 {searchQuery && (
@@ -313,10 +300,8 @@ export function Topbar() {
                   style={{ backgroundColor: "var(--border)", color: "var(--ink-tertiary)" }}>ESC</kbd>
               </div>
               <div className="p-2">
-                {["Dashboard", "Compose Post", "Calendar", "Social Accounts", "Team Settings"].map((item) => (
-                  <button
-                    key={item}
-                    onClick={() => setSearchOpen(false)}
+                {["Dashboard", "Compose Post", "Calendar", "Social Accounts", "Settings"].map((item) => (
+                  <button key={item} onClick={() => setSearchOpen(false)}
                     className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors"
                     style={{ color: "var(--ink-secondary)" }}
                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--border-subtle)"; e.currentTarget.style.color = "var(--ink-primary)"; }}

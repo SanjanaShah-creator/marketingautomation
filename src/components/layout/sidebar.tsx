@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Calendar, PenSquare, Users, Settings, Bell,
@@ -29,23 +30,26 @@ const navItems = [
       { href: "/accounts",   label: "Social Accounts", icon: Link2 },
       { href: "/media",      label: "Media Library",   icon: Image },
       { href: "/hashtags",   label: "Hashtags",        icon: Hash },
-      { href: "/scheduled",  label: "Scheduled",       icon: Clock, badge: "12" },
+      { href: "/scheduled",  label: "Scheduled",       icon: Clock },
     ],
   },
   {
     section: "Workspace",
     items: [
       { href: "/team",          label: "Team",          icon: Users },
-      { href: "/notifications", label: "Notifications", icon: Bell,     badge: "3" },
+      { href: "/notifications", label: "Notifications", icon: Bell, badge: "3" },
       { href: "/settings",      label: "Settings",      icon: Settings },
     ],
   },
 ];
 
-const MOCK_WORKSPACES = [
-  { id: "1", name: "Acme Inc.",       emoji: "🚀", plan: "Growth" },
-  { id: "2", name: "Personal Brand",  emoji: "✨", plan: "Starter" },
-];
+interface Workspace {
+  id: string;
+  name: string;
+  plan: string;
+  aiCredits: number;
+  role: string;
+}
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -53,19 +57,33 @@ interface SidebarProps {
 }
 
 export function Sidebar({ collapsed = false, onCollapse }: SidebarProps) {
-  const pathname = usePathname();
-  const router   = useRouter();
-  const [wsOpen, setWsOpen]       = useState(false);
-  const [activeWs, setActiveWs]   = useState(MOCK_WORKSPACES[0]);
-  const [workspaces, setWorkspaces] = useState(MOCK_WORKSPACES);
-  const [deleteTarget, setDeleteTarget] = useState<typeof MOCK_WORKSPACES[0] | null>(null);
+  const pathname  = usePathname();
+  const router    = useRouter();
+  const { data: session } = useSession();
+
+  const [wsOpen, setWsOpen]             = useState(false);
+  const [workspaces, setWorkspaces]     = useState<Workspace[]>([]);
+  const [activeWs, setActiveWs]         = useState<Workspace | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Workspace | null>(null);
+
+  useEffect(() => {
+    fetch("/api/workspace")
+      .then((r) => r.ok ? r.json() : [])
+      .then((data: Workspace[]) => {
+        if (data.length > 0) {
+          setWorkspaces(data);
+          setActiveWs(data[0]);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   function isActive(href: string) {
     if (href === "/dashboard") return pathname === "/dashboard";
     return pathname.startsWith(href);
   }
 
-  function handleSwitchWorkspace(ws: typeof MOCK_WORKSPACES[0]) {
+  function handleSwitchWorkspace(ws: Workspace) {
     setActiveWs(ws);
     setWsOpen(false);
   }
@@ -75,18 +93,30 @@ export function Sidebar({ collapsed = false, onCollapse }: SidebarProps) {
     router.push("/onboarding?new=true");
   }
 
-  function handleDeleteWorkspace(ws: typeof MOCK_WORKSPACES[0]) {
+  async function handleDeleteWorkspace(ws: Workspace) {
     setDeleteTarget(ws);
     setWsOpen(false);
   }
 
-  function confirmDelete() {
+  async function confirmDelete() {
     if (!deleteTarget) return;
+    await fetch(`/api/workspace/${deleteTarget.id}`, { method: "DELETE" }).catch(() => {});
     const remaining = workspaces.filter((w) => w.id !== deleteTarget.id);
     setWorkspaces(remaining);
-    if (activeWs.id === deleteTarget.id && remaining.length > 0) setActiveWs(remaining[0]);
+    if (activeWs?.id === deleteTarget.id && remaining.length > 0) setActiveWs(remaining[0]);
     setDeleteTarget(null);
   }
+
+  const userName  = session?.user?.name ?? "User";
+  const userEmail = session?.user?.email ?? "";
+  const credits        = activeWs?.aiCredits ?? 0;
+  const creditsLimit   = 50;
+  const creditsPercent = Math.round((credits / creditsLimit) * 100);
+
+  // Days until end of month for credit reset display
+  const now = new Date();
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const daysLeft = Math.ceil((endOfMonth.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
   return (
     <>
@@ -130,15 +160,19 @@ export function Sidebar({ collapsed = false, onCollapse }: SidebarProps) {
               wsOpen ? "border-[var(--border-strong)]" : "border-transparent hover:border-[var(--border)]"
             )}
             style={{ backgroundColor: wsOpen ? "var(--border-subtle)" : undefined }}>
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-xs"
-              style={{ backgroundColor: "var(--border)" }}>
-              {activeWs.emoji}
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-xs font-bold"
+              style={{ backgroundColor: "var(--border)", color: "var(--ink-primary)" }}>
+              {(activeWs?.name ?? "W").charAt(0).toUpperCase()}
             </span>
             {!collapsed && (
               <>
                 <div className="flex-1 min-w-0 text-left">
-                  <div className="truncate text-xs font-semibold" style={{ color: "var(--ink-primary)" }}>{activeWs.name}</div>
-                  <div className="text-2xs" style={{ color: "var(--ink-tertiary)" }}>{activeWs.plan} plan</div>
+                  <div className="truncate text-xs font-semibold" style={{ color: "var(--ink-primary)" }}>
+                    {activeWs?.name ?? "Loading…"}
+                  </div>
+                  <div className="text-2xs capitalize" style={{ color: "var(--ink-tertiary)" }}>
+                    {(activeWs?.plan ?? "Free").toLowerCase()} plan
+                  </div>
                 </div>
                 <ChevronDown className={cn("h-3.5 w-3.5 transition-transform shrink-0", wsOpen && "rotate-180")}
                   style={{ color: "var(--ink-tertiary)" }} />
@@ -163,22 +197,26 @@ export function Sidebar({ collapsed = false, onCollapse }: SidebarProps) {
                       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "")}>
                       <button className="flex flex-1 items-center gap-2.5 text-left min-w-0"
                         onClick={() => handleSwitchWorkspace(ws)}>
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-xs"
-                          style={{ backgroundColor: "var(--border)" }}>{ws.emoji}</span>
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-xs font-bold"
+                          style={{ backgroundColor: "var(--border)", color: "var(--ink-primary)" }}>
+                          {ws.name.charAt(0).toUpperCase()}
+                        </span>
                         <div className="flex-1 min-w-0">
                           <div className="text-xs font-medium truncate" style={{ color: "var(--ink-primary)" }}>{ws.name}</div>
-                          <div className="text-2xs" style={{ color: "var(--ink-tertiary)" }}>{ws.plan}</div>
+                          <div className="text-2xs capitalize" style={{ color: "var(--ink-tertiary)" }}>{ws.plan.toLowerCase()}</div>
                         </div>
-                        {ws.id === activeWs.id && (
+                        {ws.id === activeWs?.id && (
                           <div className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: "var(--brand-500)" }} />
                         )}
                       </button>
-                      <button onClick={() => handleDeleteWorkspace(ws)}
-                        className="shrink-0 flex h-5 w-5 items-center justify-center rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                        style={{ color: "var(--danger)" }}
-                        title="Delete workspace">
-                        <Trash2 className="h-3 w-3" />
-                      </button>
+                      {workspaces.length > 1 && (
+                        <button onClick={() => handleDeleteWorkspace(ws)}
+                          className="shrink-0 flex h-5 w-5 items-center justify-center rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                          style={{ color: "var(--danger)" }}
+                          title="Delete workspace">
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -247,19 +285,22 @@ export function Sidebar({ collapsed = false, onCollapse }: SidebarProps) {
         </nav>
 
         {/* AI Credits */}
-        {!collapsed && (
+        {!collapsed && activeWs && (
           <div className="mx-2 mb-2 rounded-xl p-3" style={{ backgroundColor: "rgba(107,191,138,0.08)", border: "1px solid rgba(107,191,138,0.15)" }}>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
                 <Sparkles className="h-3.5 w-3.5" style={{ color: "var(--brand-500)" }} />
                 <span className="text-xs font-medium" style={{ color: "var(--brand-500)" }}>AI Credits</span>
               </div>
-              <span className="text-2xs" style={{ color: "var(--ink-tertiary)" }}>32 / 50</span>
+              <span className="text-2xs" style={{ color: "var(--ink-tertiary)" }}>{credits} / {creditsLimit}</span>
             </div>
             <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ backgroundColor: "var(--border)" }}>
-              <div className="h-full w-[64%] rounded-full" style={{ background: "linear-gradient(90deg, var(--brand-500), var(--accent-500))" }} />
+              <div className="h-full rounded-full transition-all" style={{
+                width: `${creditsPercent}%`,
+                background: "linear-gradient(90deg, var(--brand-500), var(--accent-500))",
+              }} />
             </div>
-            <p className="mt-1.5 text-2xs" style={{ color: "var(--ink-tertiary)" }}>Resets in 28 days</p>
+            <p className="mt-1.5 text-2xs" style={{ color: "var(--ink-tertiary)" }}>Resets in {daysLeft} days</p>
           </div>
         )}
 
@@ -267,14 +308,13 @@ export function Sidebar({ collapsed = false, onCollapse }: SidebarProps) {
         <div className="p-2" style={{ borderTop: "1px solid var(--border)" }}>
           <div className={cn("flex w-full items-center gap-2.5 rounded-xl p-2 transition-colors cursor-pointer",
             collapsed && "justify-center")}
-            style={{ cursor: "pointer" }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--border-subtle)")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "")}>
-            <UserAvatar name="Alex Johnson" size="sm" className="shrink-0" />
+            <UserAvatar name={userName} image={session?.user?.image ?? undefined} size="sm" className="shrink-0" />
             {!collapsed && (
               <div className="flex-1 min-w-0 text-left">
-                <div className="truncate text-xs font-medium" style={{ color: "var(--ink-primary)" }}>Alex Johnson</div>
-                <div className="truncate text-2xs" style={{ color: "var(--ink-tertiary)" }}>alex@acme.com</div>
+                <div className="truncate text-xs font-medium" style={{ color: "var(--ink-primary)" }}>{userName}</div>
+                <div className="truncate text-2xs" style={{ color: "var(--ink-tertiary)" }}>{userEmail}</div>
               </div>
             )}
           </div>

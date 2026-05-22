@@ -36,7 +36,7 @@ const AvatarFallback = React.forwardRef<
   <AvatarPrimitive.Fallback
     ref={ref}
     className={cn(
-      "flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-[#6172f3] to-[#a855f7] font-semibold text-white",
+      "flex h-full w-full items-center justify-center rounded-full font-semibold text-white",
       className
     )}
     {...props}
@@ -55,7 +55,9 @@ function UserAvatar({ name, image, size = "md", className }: UserAvatarProps) {
   return (
     <Avatar size={size} className={className}>
       {image && <AvatarImage src={image} alt={name ?? "User"} />}
-      <AvatarFallback>{name ? getInitials(name) : "?"}</AvatarFallback>
+      <AvatarFallback style={{ background: "linear-gradient(135deg, var(--brand-500), var(--accent-500))" }}>
+        {name ? getInitials(name) : "?"}
+      </AvatarFallback>
     </Avatar>
   );
 }
